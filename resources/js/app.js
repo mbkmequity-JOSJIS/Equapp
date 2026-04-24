@@ -3,10 +3,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';
-import './bootstrap';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
 
 gsap.registerPlugin(ScrollTrigger);
 

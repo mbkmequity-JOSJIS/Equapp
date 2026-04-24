@@ -6,11 +6,18 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// Web Landing Page
+Route::get('/', function () {
+    return view('index');
+})->name('landing');
 
-Route::get('/lokasi-dan-perangkat', [LocationController::class, 'index'])->name('locations.index');
-Route::get('/lokasi/{id}', [LocationController::class, 'show'])->name('location.detail');
 
-Route::get('/profil-pengembang', DeveloperProfileController::class)->name('developer.profile');
+// Rute Modul IOT
+Route::get('/modul', [HomeController::class, 'index'])->name('home');
 
-Route::get('/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');
+Route::get('/modul/lokasi-dan-perangkat', [LocationController::class, 'index'])->name('locations.index');
+Route::get('/modul/lokasi/{id}', [LocationController::class, 'show'])->name('location.detail');
+
+Route::get('/modul/profil-pengembang', DeveloperProfileController::class)->name('developer.profile');
+
+Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');

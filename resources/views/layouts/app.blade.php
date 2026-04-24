@@ -36,9 +36,7 @@
                 <ul id="featureMenu"
                     class="hidden tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white   [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-4 pl-10  pr=l-10 ">
                     <li class="text-3xl opacity-60 hover:opacity-100 hover:text-shadow-slate-600 hover:translate-x-1"><a
-                            href="/">AQUAVISKA</a></li>
-                    <li class="text-3xl opacity-60 hover:opacity-100 hover:text-shadow-slate-600 hover:translate-x-1"><a
-                            href="/about">CLIMATE</a></li>
+                            href="{{ route('home') }}">Our IOT Monitoring Modul</a></li>
                     <li class="text-xs animate-pulse">---- Coming Soon... ----</li>
                 </ul>
             </div>
