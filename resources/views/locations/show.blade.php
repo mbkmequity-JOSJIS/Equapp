@@ -1,107 +1,130 @@
-@extends('layouts.public')
+@extends('layouts.app')
 
-@section('title', $location['name'].' � '.config('app.name'))
-@section('heading', 'Detail Lokasi')
-
-@php
-    $waText = 'Halo Admin EQUAPP, saya ingin melaporkan kondisi di '.$location['name'].'. Status saat ini: '.$location['status_label'].'.';
-    $waLink = 'https://wa.me/'.config('equapp.admin_whatsapp').'?text='.rawurlencode($waText);
-    $alertVariant = match ($location['status']) {
-        'bahaya', 'offline' => 'danger',
-        'waspada' => 'warn',
-        default => 'info',
-    };
-@endphp
+@section('title', $location['name'])
 
 @section('content')
-    <div class="grid gap-8 lg:grid-cols-3">
-        <div class="space-y-6 lg:col-span-2">
-            <div class="rounded-3xl border border-white/15 bg-white/10 p-6 shadow-glass backdrop-blur-xl">
-                <div class="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-white/55">Lokasi</p>
-                        <h2 class="mt-1 text-2xl font-bold text-white">{{ $location['name'] }}</h2>
-                        <p class="mt-2 text-sm text-white/70">{{ $location['address'] }}</p>
-                        <p class="mt-3 text-xs uppercase tracking-wider text-white/45">Tipe alat</p>
-                        <p class="text-sm font-semibold text-sky-100">{{ $location['type'] }}</p>
-                    </div>
-                    <x-badge :type="$location['status']" />
-                </div>
+<style>
+    .sidebar {
+        background: white !important;
+        color: #333 !important;
+    }
+    .sidebar a {
+        color: #333 !important;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+        color: #6ee89a !important;
+    }
+    .profile-icon {
+        background: #6ee89a !important;
+    }
+</style>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="breadcrumb">
+                <a href="{{ route('lokasi') }}"><i class="fas fa-arrow-left"></i> Kembali ke Lokasi</a>
+                <span class="bc-sep">/</span>
+                <span>{{ $location['name'] }}</span>
             </div>
+        </div>
 
-            <div class="rounded-3xl border border-white/15 bg-white/10 p-6 shadow-glass backdrop-blur-xl">
-                <h3 class="text-sm font-semibold uppercase tracking-wider text-white/70">Sensor &amp; indikator</h3>
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                    @foreach ($location['sensors'] as $sensor)
-                        <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <div class="flex items-center justify-between gap-2">
-                                <p class="text-sm font-semibold text-white">{{ $sensor['label'] }}</p>
-                                <x-badge :type="$sensor['status']" class="!px-2 !py-0.5 !text-[10px]" />
-                            </div>
-                            <p class="mt-2 text-2xl font-bold text-sky-50">
-                                {{ $sensor['value'] }}<span class="text-sm font-medium text-white/60">{{ $sensor['unit'] }}</span>
-                            </p>
-                            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-                                <div
-                                    class="h-full rounded-full bg-gradient-to-r from-[#0055A0] via-[#8CC1E9] to-emerald-300"
-                                    style="width: {{ (int) $sensor['pct'] }}%"
-                                ></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <div
-                class="rounded-3xl border border-white/15 bg-white/10 p-6 shadow-glass backdrop-blur-xl"
-                x-data="locationCharts(@js($location))"
-            >
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-white/70">Grafik tren (demo)</h3>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach (['6' => '6 jam', '12' => '12 jam', '24' => '24 jam'] as $key => $label)
-                            <button
-                                type="button"
-                                class="rounded-full border px-3 py-1 text-xs font-semibold transition"
-                                :class="range === '{{ $key }}' ? 'border-white/45 bg-white/20 text-white' : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10'"
-                                @click="range = '{{ $key }}'"
-                            >
-                                {{ $label }}
-                            </button>
-                        @endforeach
+        <div class="detail-hero">
+            <div class="detail-hero-image" style="background-image: url('https://via.placeholder.com/800x240/0a0f1e/f1f5f9?text={{ urlencode($location['name']) }}');">
+                <div class="detail-hero-overlay"></div>
+                <div class="detail-hero-info">
+                    <div class="device-badge {{ strtolower(str_replace(' ', '_', $location['type'])) }}">
+                        <i class="fas fa-{{ $location['type'] === 'AQUAVISKA' ? 'water' : 'cloud-sun' }}"></i>
+                        {{ $location['type'] }}
                     </div>
+                    <h1>{{ $location['name'] }}</h1>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ $location['address'] }}</p>
                 </div>
-                <div class="relative mt-6 h-72 w-full">
-                    <canvas x-ref="chartCanvas" class="max-h-full w-full"></canvas>
+                <div class="condition-score-card">
+                    <p class="score-label">Skor Kondisi</p>
+                    <p class="score-value">{{ $location['condition_score'] }}<span class="score-max">/100</span></p>
+                    <p class="score-status">{{ $location['status_label'] }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-6">
-            <div class="rounded-3xl border border-white/15 bg-white/10 p-6 text-center shadow-glass backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-wider text-white/60">Skor kondisi (0�100)</p>
-                <div class="mt-4 flex justify-center">
-                    <x-circular-score :score="$location['condition_score']" />
+        <div class="sensor-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tachometer-alt"></i> Sensor & Perangkat</h2>
+                <div class="live-badge">
+                    <div class="pulse"></div>
+                    Live Data
                 </div>
-                <p class="mt-4 text-xs text-white/60">Warna melingkar mengikuti ambang skor: hijau aman, kuning waspada, merah bahaya.</p>
+            </div>
+            <div class="sensor-grid">
+                @foreach ($location['sensors'] as $sensor)
+                    <div class="sensor-card">
+                        <div class="sensor-icon-wrap {{ strtolower(str_replace([' ', '/', '(', ')'], ['', '', '', ''], $sensor['label'])) }}">
+                            <i class="fas fa-{{ $sensor['label'] === 'Suhu' ? 'thermometer-half' : ($sensor['label'] === 'pH' ? 'flask' : ($sensor['label'] === 'Kekeruhan' ? 'eye' : ($sensor['label'] === 'Dissolved Oxygen' ? 'wind' : ($sensor['label'] === 'TDS' ? 'tint' : ($sensor['label'] === 'Kelembapan' ? 'tint' : ($sensor['label'] === 'TVOC' ? 'cloud' : ($sensor['label'] === 'CO2' ? 'cloud' : ($sensor['label'] === 'UV Index' ? 'sun' : 'question')))))))) }}"></i>
+                        </div>
+                        <div class="sensor-info">
+                            <p class="sensor-label">{{ $sensor['label'] }}</p>
+                            <p class="sensor-value">{{ $sensor['value'] }}<span class="sensor-unit">{{ $sensor['unit'] }}</span></p>
+                            <div class="sensor-bar-wrap">
+                                <div class="sensor-bar {{ $sensor['status'] === 'normal' ? 'good' : ($sensor['status'] === 'waspada' ? 'medium' : 'bad') }}" style="width: {{ (int) $sensor['pct'] }}%"></div>
+                            </div>
+                            <span class="sensor-status {{ $sensor['status'] === 'normal' ? 'good' : ($sensor['status'] === 'waspada' ? 'medium' : 'bad') }}">{{ ucfirst($sensor['status']) }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="chart-section" x-data="locationCharts(@js($location))">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Grafik Tren Data Sensor</h2>
+            </div>
+            <div class="chart-tabs">
+                <button type="button" @click="range = '6'" :class="range === '6' ? 'chart-tab active' : 'chart-tab'">6 Jam</button>
+                <button type="button" @click="range = '12'" :class="range === '12' ? 'chart-tab active' : 'chart-tab'">12 Jam</button>
+                <button type="button" @click="range = '24'" :class="range === '24' ? 'chart-tab active' : 'chart-tab'">24 Jam</button>
+            </div>
+            <div class="chart-container">
+                <canvas x-ref="chartCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="recommendation-card">
+                <div class="rec-header">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Rekomendasi</h3>
+                    <small>{{ $location['status_label'] }}</small>
+                </div>
+                <div class="rec-items">
+                    <div class="rec-item {{ $location['status'] === 'normal' ? 'good' : ($location['status'] === 'waspada' ? 'medium' : 'warn') }}">
+                        <i class="fas fa-info-circle rec-icon"></i>
+                        <div class="rec-content">
+                            <strong>{{ $location['status'] === 'normal' ? 'Kondisi Baik' : ($location['status'] === 'waspada' ? 'Perlu Perhatian' : 'Perlu Tindakan Segera') }}</strong>
+                            <p>{{ $location['recommendation'] }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <x-alert :variant="$alertVariant">
-                {{ $location['recommendation'] }}
-            </x-alert>
-
-            <a
-                href="{{ $waLink }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex w-full items-center justify-center rounded-2xl border border-emerald-300/40 bg-emerald-500/20 px-4 py-3 text-sm font-semibold text-emerald-50 shadow-[0_0_18px_rgba(16,185,129,0.35)] transition hover:bg-emerald-500/30"
-            >
-                Laporkan via WhatsApp
-            </a>
-
-            <a href="{{ route('locations.index') }}" class="block text-center text-sm font-medium text-sky-200/90 underline-offset-4 hover:underline">
-                Kembali ke daftar lokasi
-            </a>
+            <div class="report-card">
+                <div class="rep-header">
+                    <i class="fab fa-whatsapp"></i>
+                    <h3>Laporkan Masalah</h3>
+                    <small>WhatsApp</small>
+                </div>
+                <div class="rep-content">
+                    Jika Anda menemukan masalah atau ingin melaporkan kondisi lokasi ini, hubungi admin melalui WhatsApp.
+                    <div class="rep-info">
+                        <strong>Lokasi:</strong> {{ $location['name'] }}<br>
+                        <strong>Status:</strong> {{ $location['status_label'] }}<br>
+                        <strong>Skor:</strong> {{ $location['condition_score'] }}/100
+                    </div>
+                </div>
+                <a href="https://wa.me/6281234567890?text={{ rawurlencode('Halo Admin EQUITY UP, saya ingin melaporkan kondisi di '.$location['name'].' dengan status '.$location['status_label'].'.') }}" target="_blank" class="wa-button">
+                    <i class="fab fa-whatsapp"></i>
+                    Kirim Laporan
+                </a>
+            </div>
         </div>
     </div>
 @endsection
