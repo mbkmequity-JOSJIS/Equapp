@@ -109,14 +109,22 @@ Alpine.data('locationCharts', (payload) => ({
     range: '6',
     chart: null,
     init() {
-        this.$nextTick(() => this.render());
+        setTimeout(() => {
+            this.$nextTick(() => this.render());
+        }, 100);
         this.$watch('range', () => this.render());
     },
     render() {
         const canvas = this.$refs.chartCanvas;
-        if (!canvas || !window.Chart) return;
+        if (!canvas || !window.Chart) {
+            console.warn('Canvas atau Chart.js tidak tersedia');
+            return;
+        }
         const pack = this.payload.chart?.[this.range];
-        if (!pack) return;
+        if (!pack) {
+            console.warn('Data chart tidak ditemukan untuk range:', this.range);
+            return;
+        }
         if (this.chart) {
             this.chart.destroy();
         }
@@ -127,23 +135,45 @@ Alpine.data('locationCharts', (payload) => ({
                 labels: pack.labels,
                 datasets: [
                     {
-                        label: 'Indeks baca sensor (demo)',
+                        label: this.payload.type === 'AQUAVISKA' ? 'Trend Sensor Kualitas Air' : 'Trend Sensor IOT Climate',
                         data: pack.data,
-                        borderColor: 'rgba(140, 193, 233, 1)',
-                        backgroundColor: 'rgba(140, 193, 233, 0.15)',
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.18)',
                         tension: 0.35,
                         fill: true,
                         borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#0369a1',
                     },
                 ],
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: '#e2f4ff' } } },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#475569',
+                        },
+                    },
+                },
                 scales: {
-                    x: { ticks: { color: '#bcdffb' }, grid: { color: 'rgba(255,255,255,0.06)' } },
-                    y: { ticks: { color: '#bcdffb' }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                    x: {
+                        ticks: {
+                            color: '#475569',
+                        },
+                        grid: {
+                            color: '#e2e8f0',
+                        },
+                    },
+                    y: {
+                        ticks: {
+                            color: '#475569',
+                        },
+                        grid: {
+                            color: '#e2e8f0',
+                        },
+                    },
                 },
             },
         });

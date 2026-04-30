@@ -188,6 +188,85 @@
       color: #008dcc;
     }
 
+    .indicator-section {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      margin-bottom: 40px;
+    }
+
+    .indicator-section h2 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      color: #0f172a;
+    }
+
+    .indicator-section p {
+      color: #475569;
+      line-height: 1.75;
+      margin-bottom: 30px;
+      max-width: 760px;
+    }
+
+    .indicator-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      color: #0f172a;
+    }
+
+    .indicator-table th,
+    .indicator-table td {
+      padding: 16px 18px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .indicator-table th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .indicator-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .indicator-category {
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status-chip.green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-chip.yellow {
+      background: #fef9c3;
+      color: #92400e;
+    }
+
+    .status-chip.red {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
     /* ABOUT */
     .mentor {
       display: flex;
@@ -446,6 +525,103 @@
           health issues for communities.
         </p>
         <div class="icon">☢</div>
+      </div>
+
+      <div class="indicator-section">
+        <h2>Daftar Indikator Sensor</h2>
+        <p>Semua indikator ditulis dengan satuan yang umum digunakan dan penjelasan sederhana agar mudah dimengerti oleh pengguna dashboard.</p>
+
+        <table class="indicator-table">
+          <thead>
+            <tr>
+              <th>Indikator</th>
+              <th>Satuan</th>
+              <th>Keterangan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="indicator-category">
+              <td colspan="4">AQUA VISKA – Sensor Kualitas Air</td>
+            </tr>
+            <tr>
+              <td>Suhu Air</td>
+              <td>°C</td>
+              <td>Temperatur air permukaan yang diukur di lokasi.</td>
+              <td><span class="status-chip green">Normal</span></td>
+            </tr>
+            <tr>
+              <td>pH</td>
+              <td>skala 0–14</td>
+              <td>Tingkat keasaman atau kebasaan air tanpa satuan.</td>
+              <td><span class="status-chip green">Normal</span></td>
+            </tr>
+            <tr>
+              <td>Kekeruhan (Turbidity)</td>
+              <td>NTU</td>
+              <td>Seberapa keruh air; nilai lebih tinggi berarti air lebih keruh.</td>
+              <td><span class="status-chip yellow">Waspada</span></td>
+            </tr>
+            <tr>
+              <td>Dissolved Oxygen (DO)</td>
+              <td>mg/L</td>
+              <td>Jumlah oksigen terlarut yang tersedia di dalam air.</td>
+              <td><span class="status-chip green">Normal</span></td>
+            </tr>
+            <tr>
+              <td>Total Dissolved Solids (TDS)</td>
+              <td>ppm</td>
+              <td>Kadar mineral dan zat terlarut dalam air.</td>
+              <td><span class="status-chip yellow">Waspada</span></td>
+            </tr>
+
+            <tr class="indicator-category">
+              <td colspan="4">IOT CLIMATE – Sensor Kualitas Udara & Iklim</td>
+            </tr>
+            <tr>
+              <td>Suhu Udara</td>
+              <td>°C</td>
+              <td>Temperatur udara di sekitar lokasi sensor.</td>
+              <td><span class="status-chip green">Normal</span></td>
+            </tr>
+            <tr>
+              <td>Kelembapan</td>
+              <td>% RH</td>
+              <td>Persentase uap air di udara.</td>
+              <td><span class="status-chip green">Normal</span></td>
+            </tr>
+            <tr>
+              <td>TVOC</td>
+              <td>mg/m³</td>
+              <td>Kadar senyawa organik volatil di udara.</td>
+              <td><span class="status-chip yellow">Waspada</span></td>
+            </tr>
+            <tr>
+              <td>CO₂</td>
+              <td>ppm</td>
+              <td>Kadar karbon dioksida di udara.</td>
+              <td><span class="status-chip yellow">Waspada</span></td>
+            </tr>
+            <tr>
+              <td>UV Index</td>
+              <td>skala</td>
+              <td>Intensitas sinar ultraviolet yang mencapai permukaan.</td>
+              <td><span class="status-chip red">Tinggi</span></td>
+            </tr>
+            <tr>
+              <td>Kecepatan Angin</td>
+              <td>m/s</td>
+              <td>Kecepatan angin di sekitar area sensor.</td>
+              <td><span class="status-chip green">Normal</span></td>
+            </tr>
+            <tr>
+              <td>Curah Hujan</td>
+              <td>mm</td>
+              <td>Jumlah hujan yang tercatat dalam periode tertentu.</td>
+              <td><span class="status-chip green">Normal</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
