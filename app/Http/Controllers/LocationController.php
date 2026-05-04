@@ -19,10 +19,11 @@ class LocationController extends Controller
             'condition_score' => 86,
             'recommendation' => 'Kualitas air dalam batas aman. Lanjutkan pemantauan mingguan dan pastikan sensor permukaan bersih dari biofouling.',
             'sensors' => [
+                ['label' => 'Suhu Air', 'value' => '26.4', 'unit' => '°C', 'status' => 'normal', 'pct' => 55],
                 ['label' => 'pH', 'value' => '7.2', 'unit' => '', 'status' => 'normal', 'pct' => 72],
-                ['label' => 'TDS', 'value' => '210', 'unit' => 'ppm', 'status' => 'normal', 'pct' => 45],
-                ['label' => 'Suhu Air', 'value' => '26.4', 'unit' => '�C', 'status' => 'normal', 'pct' => 55],
                 ['label' => 'Kekeruhan', 'value' => '8.1', 'unit' => 'NTU', 'status' => 'waspada', 'pct' => 62],
+                ['label' => 'Dissolved Oxygen (DO)', 'value' => '6.8', 'unit' => 'mg/L', 'status' => 'normal', 'pct' => 50],
+                ['label' => 'Total Dissolved Solids (TDS)', 'value' => '210', 'unit' => 'ppm', 'status' => 'normal', 'pct' => 45],
             ],
             'chart' => [
                 '6' => ['labels' => ['-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'data' => [7.0, 7.1, 7.15, 7.2, 7.18, 7.2]],
@@ -40,10 +41,13 @@ class LocationController extends Controller
             'condition_score' => 58,
             'recommendation' => 'Kelembaban tinggi dan suhu mendekati ambang. Ventilasi ruang sensor dan kalibrasi sensor suhu direkomendasikan dalam 48 jam.',
             'sensors' => [
-                ['label' => 'Suhu Udara', 'value' => '31.2', 'unit' => '�C', 'status' => 'waspada', 'pct' => 78],
-                ['label' => 'Kelembaban', 'value' => '82', 'unit' => '%', 'status' => 'waspada', 'pct' => 82],
-                ['label' => 'Tekanan', 'value' => '1009', 'unit' => 'hPa', 'status' => 'normal', 'pct' => 40],
-                ['label' => 'Intensitas Cahaya', 'value' => '640', 'unit' => 'lux', 'status' => 'normal', 'pct' => 50],
+                ['label' => 'Suhu Udara', 'value' => '31.2', 'unit' => '°C', 'status' => 'waspada', 'pct' => 78],
+                ['label' => 'Kelembapan', 'value' => '82', 'unit' => '% RH', 'status' => 'waspada', 'pct' => 82],
+                ['label' => 'TVOC', 'value' => '0.34', 'unit' => 'mg/m³', 'status' => 'waspada', 'pct' => 68],
+                ['label' => 'CO₂', 'value' => '560', 'unit' => 'ppm', 'status' => 'waspada', 'pct' => 72],
+                ['label' => 'UV Index', 'value' => '6', 'unit' => '', 'status' => 'waspada', 'pct' => 60],
+                ['label' => 'Kecepatan Angin', 'value' => '4.2', 'unit' => 'm/s', 'status' => 'normal', 'pct' => 42],
+                ['label' => 'Curah Hujan', 'value' => '1.8', 'unit' => 'mm', 'status' => 'normal', 'pct' => 18],
             ],
             'chart' => [
                 '6' => ['labels' => ['-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'data' => [29.5, 30.0, 30.4, 30.8, 31.0, 31.2]],
@@ -61,10 +65,11 @@ class LocationController extends Controller
             'condition_score' => 24,
             'recommendation' => 'Sensor utama tidak merespons. Periksa koneksi listrik, modul telemetry, dan lakukan restart terkontrol. Eskalasi ke tim lapangan.',
             'sensors' => [
+                ['label' => 'Suhu Air', 'value' => '24.1', 'unit' => '°C', 'status' => 'waspada', 'pct' => 35],
                 ['label' => 'pH', 'value' => '�', 'unit' => '', 'status' => 'bahaya', 'pct' => 0],
-                ['label' => 'TDS', 'value' => '�', 'unit' => 'ppm', 'status' => 'bahaya', 'pct' => 0],
-                ['label' => 'Suhu Air', 'value' => '24.1', 'unit' => '�C', 'status' => 'waspada', 'pct' => 35],
                 ['label' => 'Kekeruhan', 'value' => '�', 'unit' => 'NTU', 'status' => 'bahaya', 'pct' => 0],
+                ['label' => 'Dissolved Oxygen (DO)', 'value' => '�', 'unit' => 'mg/L', 'status' => 'bahaya', 'pct' => 0],
+                ['label' => 'Total Dissolved Solids (TDS)', 'value' => '�', 'unit' => 'ppm', 'status' => 'bahaya', 'pct' => 0],
             ],
             'chart' => [
                 '6' => ['labels' => ['-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'data' => [7.1, 6.9, 6.4, 5.8, 4.2, 0]],
