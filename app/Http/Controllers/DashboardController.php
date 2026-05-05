@@ -9,12 +9,7 @@ class DashboardController extends Controller
     public function index()
     {
         $sections = [
-            "feature" => "Feature",
-            "sdgs" => "SDGs",
-            "equityproject" => "Equity Projects",
-            "about-us" => "About Us",
-            "faq" => "FAQ",
-            "contact" => "Contact Us"
+            "indikator" => "Indikator Sensor",
         ];
 
         $faqs = [

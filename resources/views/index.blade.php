@@ -227,7 +227,7 @@
         {{-- faq content --}}
         <div class="flex p-10 mt-10 max-h-[95%] overflow-hidden" id="content-faq">
             {{-- faq list --}}
-            <div class="w- 1/4">
+            <div class="w-1/4">
                 <h1 class="text-xl tracking-wide font-bold text-slate-600">Frequently Asked Questions</h1>
                 <p class="text-lg text-slate-500 mt-5">Here are some of our FAQs. If you have any other questions, please
                     feel free to contact us.</p>
@@ -266,7 +266,7 @@
                 <div class="transition-all duration-500 p-5 rounded-md cursor-pointer">
                     <h2 class="text-xl flex justify-between items-center" id="question">How can I get involved with the
                         EQUITY project? <i class="fa-solid fa-plus transition-all duration-500"></i> </h2>
-                    <p class="text-sm text-slate-600 mt-2 h-0 overflow-hidden transition-allduration-500">There are
+                    <p class="text-sm text-slate-600 mt-2 h-0 overflow-hidden transition-all duration-500">There are
                         several ways to get involved with the EQUITY
                         project. You can participate in our community events, contribute to our research initiatives, or
                         collaborate with us on projects that align with our mission. Please contact us for more information
