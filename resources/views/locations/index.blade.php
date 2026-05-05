@@ -4,7 +4,6 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @section('style')
     <style>
-
         /* CONTENT */
         .content {
             background: #fff;
@@ -22,7 +21,7 @@
         }
 
         .page-title-wrap {
-            display: flex;
+            width: 100%;
             align-items: center;
             gap: 15px;
             margin-bottom: 10px;
@@ -287,8 +286,8 @@
     <!-- MAIN CONTENT -->
     <main class="content">
         <div class="main-content" x-data="{ activeTab: 'semua' }">
-            <div class="page-header">
-                <div class="page-title-wrap">
+            <div class="page-header ">
+                <div class="page-title-wrap w-full">
                     <h1 class="page-title">
                         <i class="fas fa-map-marker-alt"></i>
                         Lokasi & Perangkat
@@ -338,7 +337,7 @@
                         x-show="activeTab === 'semua' || (activeTab === 'aquaviska' && '{{ $loc['type'] }}' === 'AQUAVISKA') || (activeTab === 'iot' && '{{ $loc['type'] }}' === 'IOT Climate')"
                         x-cloak>
                         <div class="card-image-wrap">
-                            <img src="https://via.placeholder.com/300x180/1e2d45/94a3b8?text={{ urlencode($loc['name']) }}"
+                            <img src="{{ asset('storage/img_loc/' . $loc['image']) }}"
                                 alt="{{ $loc['name'] }}" class="card-image">
                             <div class="card-device-badge {{ strtolower(str_replace(' ', '_', $loc['type'])) }}">
                                 <i class="fas fa-{{ $loc['type'] === 'AQUAVISKA' ? 'water' : 'cloud-sun' }}"></i>
