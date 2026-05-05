@@ -203,9 +203,8 @@
         <section id="indikator" class="active">
 
             <div class="indicator-section">
-                <h2>Daftar Indikator Sensor</h2>
-                <p>Semua indikator ditulis dengan satuan yang umum digunakan dan penjelasan sederhana agar mudah
-                    dimengerti oleh pengguna dashboard.</p>
+                <h2 class="font-semibold tracking-wider bg-linear-to-r py-1 pl-2 from-slate-100 to-transparent"><i class="fa-solid fa-gauge"></i> Daftar <span class="bg-green-400 px-1.5 py-1 text-white uppercase rounded">Indikator Sensor</span></h2>
+                <p>Semua indikator ditulis dengan satuan yang umum digunakan dan penjelasan sederhana agar mudah dimengerti oleh pengguna dashboard.</p>
 
                 <table class="indicator-table">
                     <thead>
