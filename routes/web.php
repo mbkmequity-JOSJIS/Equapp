@@ -1,9 +1,24 @@
 <?php
 
+
 use App\Http\Controllers\Api\BmkgProxyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
+use Kreait\Firebase\Factory;
+
+
+Route::get('/test-firebase', function () {
+    $factory = (new Factory)
+        ->withServiceAccount(storage_path('app/firebase/firebase_credentials.json'))
+        ->withDatabaseUri('https://equapp-5718f-default-rtdb.firebaseio.com');
+
+    $database = $factory->createDatabase();
+
+    $data = $database->getReference('KualitasAir')->getValue();
+
+    return response()->json($data);
+});
 
 Route::get('/', function () {
     return view('index');
