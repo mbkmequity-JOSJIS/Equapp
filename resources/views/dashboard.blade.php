@@ -70,9 +70,9 @@
         /* SDGS */
         .sdgs-wrap {
             display: flex;
-            align-items: center;
+            align-items: start;
             gap: 70px;
-            background: #9bd8f2;
+            /* background: #9bd8f2; */
             padding: 90px 70px;
             min-height: 85vh;
         }
@@ -81,10 +81,6 @@
             width: 420px;
         }
 
-        .sdgs-text h1 {
-            font-size: 58px;
-            color: white;
-        }
 
         .sdgs-text h3 {
             font-size: 28px;
@@ -187,10 +183,11 @@
 @section('content')
     <main class="content">
 
-        <section id="feature" class="active">
+        <section id="feature" class="active relative">
+            <div class="p-10 -z-10 absolute inset-0 bg-cover bg-left w-[97%] h-full bg-no-repeat opacity-60" style="background-image: url({{ asset('images/full-team.png') }});"></div>
             <div class="sdgs-wrap">
-                <div class="sdgs-text">
-                    <h1>EQUApp</h1>
+                <div class="sdgs-text bg-white/10 p-10 rounded-lg shadow-lg backdrop-blur-sm">
+                    <h1 class="font-black tracking-wider text-[6rem] text-slate-500/90">EQUApp</h1>
                     <h3>Environmental Quality Application</h3>
                     <p>
                         A web-based IoT monitoring platform for real-time environmental
