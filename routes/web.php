@@ -3,7 +3,8 @@
 
 use App\Http\Controllers\Api\BmkgProxyController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ModulController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Factory;
 
@@ -24,10 +25,12 @@ Route::get('/', function () {
     return view('index');
 })->name('welcome');
 
-Route::get('/modul/', [DashboardController::class, 'index'])->name('home');
 
-Route::get('/modul/lokasi', [LocationController::class, 'index'])->name('lokasi');
-Route::get('/modul/perangkat', [LocationController::class, 'index'])->name('perangkat');
-Route::get('/modul/lokasi/{id}', [LocationController::class, 'show'])->name('location.detail');
+Route::get('/login', [AuthController::class, 'index'])->name('login.view');
 
+// Modul Routes 
+Route::get('/modul/', [DashboardController::class, 'index'])->name('home.modul');
+Route::get('/modul/lokasi', [ModulController::class, 'index'])->name('lokasi.modul');
+Route::get('/modul/perangkat', [ModulController::class, 'index'])->name('perangkat.modul');
+Route::get('/modul/lokasi/{id}', [ModulController::class, 'show'])->name('location.detail.modul');
 Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');

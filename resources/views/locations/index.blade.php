@@ -333,7 +333,7 @@
 
             <div class="location-grid">
                 @foreach ($locations as $loc)
-                    <a href="{{ route('location.detail', $loc['id']) }}" class="location-card"
+                    <a href="{{ route('location.detail.modul', $loc['id']) }}" class="location-card"
                         x-show="activeTab === 'semua' || (activeTab === 'aquaviska' && '{{ $loc['type'] }}' === 'AQUAVISKA') || (activeTab === 'iot' && '{{ $loc['type'] }}' === 'IOT Climate')"
                         x-cloak>
                         <div class="card-image-wrap">
