@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BmkgProxyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ModulController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Factory;
 
@@ -26,7 +27,12 @@ Route::get('/', function () {
 })->name('welcome');
 
 
+// Auth Routes
 Route::get('/login', [AuthController::class, 'index'])->name('login.view');
+
+// Admin Routes
+Route::get('/admin', [AdminController::class, 'index'])->name('admin.home');
+
 
 // Modul Routes 
 Route::get('/modul/', [DashboardController::class, 'index'])->name('home.modul');
