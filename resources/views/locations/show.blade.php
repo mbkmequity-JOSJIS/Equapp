@@ -664,7 +664,7 @@
                         <h1>{{ $location['name'] }}</h1>
                         <p><i class="fas fa-map-marker-alt"></i> {{ $location['address'] }}</p>
                     </div>
-                    <div class="condition-score-card">
+                    <div class="condition-score-card" id="score-badge" data-location-id="{{ $location['id'] }}">
                         <p class="score-label">Skor Kondisi</p>
                         <p class="score-value">{{ $location['condition_score'] }}<span class="score-max">/100</span></p>
                         <p class="score-status">{{ $location['status_label'] }}</p>
@@ -682,7 +682,7 @@
                 </div>
                 <div class="sensor-grid">
                     @foreach ($location['sensors'] as $sensor)
-                        <div class="sensor-card">
+                        <div class="sensor-card" data-sensor-label="{{ $sensor['label'] }}">
                             <div
                                 class="sensor-icon-wrap {{ strtolower(str_replace([' ', '/', '(', ')'], ['', '', '', ''], $sensor['label'])) }}">
                                 @php
@@ -952,5 +952,109 @@
             alert('Form kalibrasi telah disimpan (simulasi UI). Backend dapat ditambahkan kemudian.');
             modal.classList.add('hidden');
         }
+    </script>
+
+    <script>
+        /**
+         * Auto-refresh untuk detail lokasi - polling setiap 5 detik
+         * Hanya update elemen yang berubah dari Firebase
+         */
+        (function() {
+            const locationId = {{ $location['id'] }};
+            const POLL_INTERVAL = 5000;
+            const API_URL = `{{ route('api.location.detail', ['id' => $location['id']]) }}`;
+            let lastDataSignature = '';
+
+            async function fetchLocationData() {
+                try {
+                    const response = await fetch(`${API_URL}?_=${Date.now()}`, {
+                        cache: 'no-store',
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    return await response.json();
+                } catch (error) {
+                    console.warn('Polling error:', error);
+                    return null;
+                }
+            }
+
+            function updateScoreBadge(data) {
+                const badge = document.getElementById('score-badge');
+                if (!badge) return;
+                
+                const scoreEl = badge.querySelector('.score-value');
+                const statusEl = badge.querySelector('.score-status');
+                
+                if (scoreEl) {
+                    scoreEl.innerHTML = `${data.condition_score}<span class="score-max">/100</span>`;
+                }
+                
+                if (statusEl) {
+                    statusEl.textContent = data.status_label;
+                    statusEl.style.color = data.status === 'normal' ? '#22c55e' : (data.status === 'waspada' ? '#f59e0b' : '#ef4444');
+                }
+            }
+
+            function updateSensorCards(data) {
+                if (!Array.isArray(data.sensors)) return;
+
+                data.sensors.forEach(sensor => {
+                    const card = document.querySelector(`[data-sensor-label="${sensor.label}"]`);
+                    if (!card) return;
+
+                    const valueEl = card.querySelector('.sensor-value');
+                    const statusEl = card.querySelector('.sensor-status');
+                    const barEl = card.querySelector('.sensor-bar');
+
+                    if (valueEl) {
+                        valueEl.innerHTML = `${sensor.value}<span class="sensor-unit">${sensor.unit}</span>`;
+                    }
+
+                    if (statusEl) {
+                        statusEl.textContent = sensor.status.charAt(0).toUpperCase() + sensor.status.slice(1);
+                        statusEl.className = `sensor-status ${sensor.status === 'normal' ? 'good' : (sensor.status === 'waspada' ? 'medium' : 'bad')}`;
+                    }
+
+                    if (barEl) {
+                        barEl.className = `sensor-bar ${sensor.status === 'normal' ? 'good' : (sensor.status === 'waspada' ? 'medium' : 'bad')}`;
+                        barEl.style.width = `${sensor.pct}%`;
+                    }
+                });
+            }
+
+            function updateRecommendation(data) {
+                const recCard = document.querySelector('.recommendation-card .rec-header small');
+                if (recCard) {
+                    recCard.textContent = data.status_label;
+                }
+
+                const recItem = document.querySelector('.rec-item');
+                const recContent = document.querySelector('.rec-item .rec-content p');
+                if (recItem) {
+                    const newClass = `rec-item ${data.status === 'normal' ? 'good' : (data.status === 'waspada' ? 'medium' : 'warn')}`;
+                    recItem.className = newClass;
+                }
+                if (recContent) {
+                    recContent.textContent = data.recommendation;
+                }
+            }
+
+            async function autoRefresh() {
+                const newData = await fetchLocationData();
+                if (!newData) return;
+
+                const signature = JSON.stringify(newData);
+                if (signature === lastDataSignature) return;
+
+                updateScoreBadge(newData);
+                updateSensorCards(newData);
+                updateRecommendation(newData);
+
+                lastDataSignature = signature;
+            }
+
+            setInterval(autoRefresh, POLL_INTERVAL);
+            autoRefresh();
+        })();
     </script>
 @endsection
