@@ -18,7 +18,22 @@ class FirebaseService
 
     public function getDataAquaviska()
     {
-        return $this->database->getReference('water_quality')->getValue();
+        return $this->getRawWaterQualityData();
+    }
+
+    public function getRawWaterQualityData(): array
+    {
+        $paths = ['KualitasAir', 'water_quality'];
+
+        foreach ($paths as $path) {
+            $value = $this->database->getReference($path)->getValue();
+
+            if (is_array($value) && ! empty($value)) {
+                return $value;
+            }
+        }
+
+        return [];
     }
 
     /**
