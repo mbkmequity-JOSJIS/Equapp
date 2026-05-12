@@ -325,6 +325,12 @@
             color: #991b1b;
         }
 
+        .sensor-status.loading {
+            background: #f3f4f6;
+            color: #6b7280;
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
         /* Chart Section */
         .chart-section {
             margin-bottom: 40px;
@@ -682,7 +688,7 @@
                 </div>
                 <div class="sensor-grid">
                     @foreach ($location['sensors'] as $sensor)
-                        <div class="sensor-card">
+                        <div class="sensor-card" data-sensor-label="{{ $sensor['label'] }}" data-sensor-key="{{ strtolower(str_replace([' ', '/', '(', ')', '₂'], ['', '', '', '', '2'], $sensor['label'])) }}">
                             <div
                                 class="sensor-icon-wrap {{ strtolower(str_replace([' ', '/', '(', ')'], ['', '', '', ''], $sensor['label'])) }}">
                                 @php
@@ -719,11 +725,11 @@
                                 <p class="sensor-value">{{ $sensor['value'] }}<span
                                         class="sensor-unit">{{ $sensor['unit'] }}</span></p>
                                 <div class="sensor-bar-wrap">
-                                    <div class="sensor-bar {{ $sensor['status'] === 'normal' ? 'good' : ($sensor['status'] === 'waspada' ? 'medium' : 'bad') }}"
-                                        style="width: {{ (int) $sensor['pct'] }}%"></div>
+                                    <div class="sensor-bar good"
+                                        style="width: 0%"></div>
                                 </div>
                                 <span
-                                    class="sensor-status {{ $sensor['status'] === 'normal' ? 'good' : ($sensor['status'] === 'waspada' ? 'medium' : 'bad') }}">{{ ucfirst($sensor['status']) }}</span>
+                                    class="sensor-status loading">Loading...</span>
                                 <button type="button" class="calibration-button"
                                     onclick="openCalibrationForm(@js($sensor['label']))">
                                     <i class="fas fa-vial"></i> Form Kalibrasi

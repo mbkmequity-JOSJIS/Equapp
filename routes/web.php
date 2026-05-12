@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Api\BmkgProxyController;
+use App\Http\Controllers\Api\IndicatorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
@@ -31,3 +32,10 @@ Route::get('/modul/perangkat', [LocationController::class, 'index'])->name('pera
 Route::get('/modul/lokasi/{id}', [LocationController::class, 'show'])->name('location.detail');
 
 Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');
+
+// API Routes for Indicators
+Route::prefix('/api/indicators')->group(function () {
+    Route::get('/aquaviska/{area?}', [IndicatorController::class, 'aquaviska'])->name('api.indicators.aquaviska');
+    Route::get('/location/{locationId}', [IndicatorController::class, 'location'])->name('api.indicators.location');
+    Route::get('/iot-climate/{locationId?}', [IndicatorController::class, 'iotClimate'])->name('api.indicators.iotClimate');
+});

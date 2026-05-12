@@ -179,6 +179,37 @@
             color: #b91c1c;
         }
 
+        .status-chip.loading {
+            background: #f3f4f6;
+            color: #6b7280;
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .status-chip.good {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-chip.medium {
+            background: #fef9c3;
+            color: #92400e;
+        }
+
+        .status-chip.bad {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
     </style>
 @endsection
 
@@ -215,85 +246,157 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="aquaviska-indicators">
                         <tr class="indicator-category">
                             <td colspan="4">AQUA VISKA – Sensor Kualitas Air</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="temperature">
                             <td>Suhu Air</td>
                             <td>°C</td>
                             <td>Temperatur air permukaan yang diukur di lokasi.</td>
-                            <td><span class="status-chip green">Normal</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="ph">
                             <td>pH</td>
                             <td>skala 0–14</td>
                             <td>Tingkat keasaman atau kebasaan air tanpa satuan.</td>
-                            <td><span class="status-chip green">Normal</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="turbidity">
                             <td>Kekeruhan (Turbidity)</td>
                             <td>NTU</td>
                             <td>Seberapa keruh air; nilai lebih tinggi berarti air lebih keruh.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="do">
                             <td>Dissolved Oxygen (DO)</td>
                             <td>mg/L</td>
                             <td>Jumlah oksigen terlarut yang tersedia di dalam air.</td>
-                            <td><span class="status-chip green">Normal</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="tds">
                             <td>Total Dissolved Solids (TDS)</td>
                             <td>ppm</td>
                             <td>Kadar mineral dan zat terlarut dalam air.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
 
                         <tr class="indicator-category">
                             <td colspan="4">IOT CLIMATE – Sensor Kualitas Udara & Iklim</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="air_temp">
                             <td>Suhu Udara</td>
                             <td>°C</td>
                             <td>Temperatur udara di sekitar lokasi sensor.</td>
-                            <td><span class="status-chip green">Normal</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="humidity">
                             <td>Kelembapan</td>
                             <td>% RH</td>
                             <td>Persentase uap air di udara.</td>
-                            <td><span class="status-chip green">Normal</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="tvoc">
                             <td>TVOC</td>
                             <td>mg/m³</td>
                             <td>Kadar senyawa organik volatil di udara.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="co2">
                             <td>CO₂</td>
                             <td>ppm</td>
                             <td>Kadar karbon dioksida di udara.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="uv_index">
                             <td>UV Index</td>
                             <td>skala</td>
                             <td>Intensitas sinar ultraviolet yang mencapai permukaan.</td>
-                            <td><span class="status-chip red">Tinggi</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="wind_speed">
                             <td>Kecepatan Angin</td>
                             <td>m/s</td>
                             <td>Kecepatan angin di sekitar area sensor.</td>
-                            <td><span class="status-chip green">Normal</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="rainfall">
                             <td>Curah Hujan</td>
                             <td>mm</td>
                             <td>Jumlah hujan yang tercatat dalam periode tertentu.</td>
-                            <td><span class="status-chip green">Normal</span></td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <span class="status-chip good">Normal</span>
+                                    <span class="status-chip medium">Waspada</span>
+                                    <span class="status-chip bad">Bahaya</span>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
