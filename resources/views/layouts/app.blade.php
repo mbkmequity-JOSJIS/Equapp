@@ -48,13 +48,9 @@
                         class="[&>li]:text-3xl tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white  [&>li]:hover:text-sky-400 [&>li]:hover:text-shadow-slate-600  [&>li]:hover:bg-slate-50/10 px-1 py-1.5 rounded-3xl [&>li]:hover:translate-x-1 [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-2 ">
 
                         {{-- sidebar module --}}
-                        <li><a href="{{ route('welcome') }}" class="flex items-center gap-2 opacity-40 hover:opacity-100"><i class="fa-solid fa-arrow-left text-lg "></i><span class="text-lg">back</span></a></li>
-                        <li><a href="{{ route('home') }}" class="">Home</a></li>
+                        <li><a href="{{ route('welcome') }}" class="">Home</a></li>
                         <li><a href="#indikator" class="">Indikator</a></li>
-                        <span class="text-sm bg-slate-50/20 px-2 py-1.5 text-white mt-1.5">IOT Module Feature</span>
-                        <hr class="p-0 m-0 mt-2 border-slate-100/40">
-                        <li><a href="{{ route('lokasi') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-location-arrow"></i> Lokasi</a></li>
-                        <li><a href="{{ route('perangkat') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-microchip"></i> Perangkat</a></li>
+                        <li><a href="{{ route('lokasi') }}" class="">Lokasi & Perangkat</a></li>
                     </ul>
                 @endif
             </div>

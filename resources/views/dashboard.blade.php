@@ -67,39 +67,6 @@
             background: linear-gradient(90deg, #6ee89a, #ffc176);
         }
 
-        /* SDGS */
-        .sdgs-wrap {
-            display: flex;
-            align-items: center;
-            gap: 70px;
-            background: #9bd8f2;
-            padding: 90px 70px;
-            min-height: 85vh;
-        }
-
-        .sdgs-wrap img {
-            width: 420px;
-        }
-
-        .sdgs-text h1 {
-            font-size: 58px;
-            color: white;
-        }
-
-        .sdgs-text h3 {
-            font-size: 28px;
-            color: #3e5870;
-            margin-bottom: 30px;
-        }
-
-        .sdgs-text p {
-            font-size: 26px;
-            line-height: 1.45;
-            color: white;
-            max-width: 850px;
-        }
-
-
         .indicator-section {
             background: #ffffff;
             border-radius: 20px;
@@ -154,31 +121,6 @@
             letter-spacing: 0.08em;
         }
 
-        .status-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .status-chip.green {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-chip.yellow {
-            background: #fef9c3;
-            color: #92400e;
-        }
-
-        .status-chip.red {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
     </style>
 @endsection
 
@@ -186,20 +128,6 @@
 
 @section('content')
     <main class="content">
-
-        <section id="feature" class="active">
-            <div class="sdgs-wrap">
-                <div class="sdgs-text">
-                    <h1>EQUApp</h1>
-                    <h3>Environmental Quality Application</h3>
-                    <p>
-                        A web-based IoT monitoring platform for real-time environmental
-                        quality tracking, especially water and air quality.
-                    </p>
-                </div>
-            </div>
-        </section>
-
         <section id="indikator" class="active">
 
             <div class="indicator-section">
@@ -212,88 +140,75 @@
                             <th>Indikator</th>
                             <th>Satuan</th>
                             <th>Keterangan</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr class="indicator-category">
-                            <td colspan="4">AQUA VISKA – Sensor Kualitas Air</td>
+                            <td colspan="3">AQUA VISKA – Sensor Kualitas Air</td>
                         </tr>
                         <tr>
                             <td>Suhu Air</td>
                             <td>°C</td>
                             <td>Temperatur air permukaan yang diukur di lokasi.</td>
-                            <td><span class="status-chip green">Normal</span></td>
                         </tr>
                         <tr>
                             <td>pH</td>
                             <td>skala 0–14</td>
                             <td>Tingkat keasaman atau kebasaan air tanpa satuan.</td>
-                            <td><span class="status-chip green">Normal</span></td>
                         </tr>
                         <tr>
                             <td>Kekeruhan (Turbidity)</td>
                             <td>NTU</td>
                             <td>Seberapa keruh air; nilai lebih tinggi berarti air lebih keruh.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
                         </tr>
                         <tr>
                             <td>Dissolved Oxygen (DO)</td>
                             <td>mg/L</td>
                             <td>Jumlah oksigen terlarut yang tersedia di dalam air.</td>
-                            <td><span class="status-chip green">Normal</span></td>
                         </tr>
                         <tr>
                             <td>Total Dissolved Solids (TDS)</td>
                             <td>ppm</td>
                             <td>Kadar mineral dan zat terlarut dalam air.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
                         </tr>
 
                         <tr class="indicator-category">
-                            <td colspan="4">IOT CLIMATE – Sensor Kualitas Udara & Iklim</td>
+                            <td colspan="3">IOT CLIMATE – Sensor Kualitas Udara & Iklim</td>
                         </tr>
                         <tr>
                             <td>Suhu Udara</td>
                             <td>°C</td>
                             <td>Temperatur udara di sekitar lokasi sensor.</td>
-                            <td><span class="status-chip green">Normal</span></td>
                         </tr>
                         <tr>
                             <td>Kelembapan</td>
                             <td>% RH</td>
                             <td>Persentase uap air di udara.</td>
-                            <td><span class="status-chip green">Normal</span></td>
                         </tr>
                         <tr>
                             <td>TVOC</td>
                             <td>mg/m³</td>
                             <td>Kadar senyawa organik volatil di udara.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
                         </tr>
                         <tr>
                             <td>CO₂</td>
                             <td>ppm</td>
                             <td>Kadar karbon dioksida di udara.</td>
-                            <td><span class="status-chip yellow">Waspada</span></td>
                         </tr>
                         <tr>
                             <td>UV Index</td>
                             <td>skala</td>
                             <td>Intensitas sinar ultraviolet yang mencapai permukaan.</td>
-                            <td><span class="status-chip red">Tinggi</span></td>
                         </tr>
                         <tr>
                             <td>Kecepatan Angin</td>
                             <td>m/s</td>
                             <td>Kecepatan angin di sekitar area sensor.</td>
-                            <td><span class="status-chip green">Normal</span></td>
                         </tr>
                         <tr>
                             <td>Curah Hujan</td>
                             <td>mm</td>
                             <td>Jumlah hujan yang tercatat dalam periode tertentu.</td>
-                            <td><span class="status-chip green">Normal</span></td>
                         </tr>
                     </tbody>
                 </table>

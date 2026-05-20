@@ -285,7 +285,8 @@
 @section('content')
     <!-- MAIN CONTENT -->
     <main class="content">
-        <div class="main-content" x-data="{ activeTab: 'semua' }">
+        <div class="main-content"
+            x-data="locationsPage({ locations: @js($locations), detailBaseUrl: '{{ url('/modul/lokasi') }}', imageBaseUrl: '{{ asset('storage/img_loc') }}' })">
             <div class="page-header ">
                 <div class="page-title-wrap w-full">
                     <h1 class="page-title">
@@ -318,65 +319,150 @@
                 <div class="search-sort-wrap">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Cari lokasi..." x-data="{ search: '' }" x-model="search">
+                        <input type="text" placeholder="Cari lokasi..." x-model="search">
                     </div>
                     <div class="sort-select">
-                        <select>
-                            <option>Urutkan berdasarkan</option>
-                            <option>Skor Tertinggi</option>
-                            <option>Skor Terendah</option>
-                            <option>Nama A-Z</option>
+                        <select x-model="sortBy">
+                            <option value="default">Urutkan berdasarkan</option>
+                            <option value="score_desc">Skor Tertinggi</option>
+                            <option value="score_asc">Skor Terendah</option>
+                            <option value="name_asc">Nama A-Z</option>
                         </select>
                     </div>
                 </div>
             </div>
 
             <div class="location-grid">
-                @foreach ($locations as $loc)
-                    <a href="{{ route('location.detail', $loc['id']) }}" class="location-card"
-                        x-show="activeTab === 'semua' || (activeTab === 'aquaviska' && '{{ $loc['type'] }}' === 'AQUAVISKA') || (activeTab === 'iot' && '{{ $loc['type'] }}' === 'IOT Climate')"
-                        x-cloak>
+                <template x-for="loc in filteredLocations" :key="loc.id">
+                    <a :href="`${detailBaseUrl}/${loc.id}`" class="location-card" x-cloak>
                         <div class="card-image-wrap">
-                            <img src="{{ asset('storage/img_loc/' . $loc['image']) }}"
-                                alt="{{ $loc['name'] }}" class="card-image">
-                            <div class="card-device-badge {{ strtolower(str_replace(' ', '_', $loc['type'])) }}">
-                                <i class="fas fa-{{ $loc['type'] === 'AQUAVISKA' ? 'water' : 'cloud-sun' }}"></i>
-                                {{ $loc['type'] }}
+                            <img :src="`${imageBaseUrl}/${loc.image}`" :alt="loc.name" class="card-image">
+                            <div class="card-device-badge">
+                                <i class="fas" :class="loc.type === 'AQUAVISKA' ? 'fa-water' : 'fa-cloud-sun'"></i>
+                                <span x-text="loc.type"></span>
                             </div>
-                            <div class="card-score-badge"
-                                style="--score-color: {{ $loc['status'] === 'normal' ? '#22c55e' : ($loc['status'] === 'waspada' ? '#f59e0b' : '#ef4444') }}">
-                                {{ $loc['condition_score'] }}
+                            <div class="card-score-badge" :style="`--score-color: ${scoreColor(loc.status)}`">
+                                <span x-text="loc.condition_score"></span>
                             </div>
                         </div>
                         <div class="card-body">
-                            <h3 class="card-title">{{ $loc['name'] }}</h3>
+                            <h3 class="card-title" x-text="loc.name"></h3>
                             <div class="card-meta">
-                                <span><i class="fas fa-map-pin"></i>{{ $loc['address'] }}</span>
+                                <span><i class="fas fa-map-pin"></i><span x-text="loc.address"></span></span>
                             </div>
                             <div class="card-quality-row">
                                 <span class="quality-label">Kualitas</span>
-                                <span
-                                    class="quality-badge {{ $loc['status'] === 'normal' ? 'good' : ($loc['status'] === 'waspada' ? 'medium' : 'bad') }}">
-                                    {{ $loc['status_label'] }}
-                                </span>
+                                <span class="quality-badge" :class="qualityBadgeClass(loc.status)" x-text="loc.status_label"></span>
                             </div>
                             <div class="sensor-preview">
-                                @foreach (array_slice($loc['sensors'], 0, 3) as $sensor)
+                                <template x-for="sensor in (loc.sensors || []).slice(0, 3)"
+                                    :key="`${loc.id}-${sensor.label}`">
                                     <div class="preview-item">
                                         <i class="fas fa-circle"></i>
-                                        {{ $sensor['label'] }}
+                                        <span x-text="sensor.label"></span>
                                     </div>
-                                @endforeach
-                                @if (count($loc['sensors']) > 3)
+                                </template>
+                                <template x-if="(loc.sensors || []).length > 3">
                                     <div class="preview-item">
-                                        +{{ count($loc['sensors']) - 3 }} lainnya
+                                        <span x-text="`+${(loc.sensors || []).length - 3} lainnya`"></span>
                                     </div>
-                                @endif
+                                </template>
                             </div>
                         </div>
                     </a>
-                @endforeach
+                </template>
+            </div>
+
+            <div x-show="filteredLocations.length === 0" x-cloak
+                style="margin-top: 20px; padding: 16px; border-radius: 10px; background: #f8fafc; color: #475569;">
+                Data lokasi tidak ditemukan untuk filter/pencarian saat ini.
             </div>
         </div>
     </main>
+@endsection
+
+@section('script')
+    <script>
+        function locationsPage({
+            locations,
+            detailBaseUrl,
+            imageBaseUrl
+        }) {
+            return {
+                locations: Array.isArray(locations) ? locations : [],
+                detailBaseUrl,
+                imageBaseUrl,
+                activeTab: 'semua',
+                search: '',
+                sortBy: 'default',
+                filteredLocations: [],
+                init() {
+                    this.applyFilters();
+                    this.$watch('activeTab', () => this.applyFilters());
+                    this.$watch('search', () => this.applyFilters());
+                    this.$watch('sortBy', () => this.applyFilters());
+                },
+                applyFilters() {
+                    const query = this.search.trim().toLowerCase();
+
+                    let rows = this.locations.filter((loc) => {
+                        const passTab = this.activeTab === 'semua' ||
+                            (this.activeTab === 'aquaviska' && loc.type === 'AQUAVISKA') ||
+                            (this.activeTab === 'iot' && loc.type === 'IOT Climate');
+
+                        if (!passTab) {
+                            return false;
+                        }
+
+                        if (!query) {
+                            return true;
+                        }
+
+                        const sensorLabels = (loc.sensors || [])
+                            .map((sensor) => sensor.label || '')
+                            .join(' ')
+                            .toLowerCase();
+
+                        const haystack = `${loc.name || ''} ${loc.address || ''} ${loc.type || ''} ${sensorLabels}`
+                            .toLowerCase();
+
+                        return haystack.includes(query);
+                    });
+
+                    rows.sort((a, b) => {
+                        if (this.sortBy === 'score_desc') {
+                            return (b.condition_score || 0) - (a.condition_score || 0);
+                        }
+                        if (this.sortBy === 'score_asc') {
+                            return (a.condition_score || 0) - (b.condition_score || 0);
+                        }
+                        if (this.sortBy === 'name_asc') {
+                            return (a.name || '').localeCompare(b.name || '', 'id-ID');
+                        }
+                        return 0;
+                    });
+
+                    this.filteredLocations = rows;
+                },
+                qualityBadgeClass(status) {
+                    if (status === 'normal') {
+                        return 'good';
+                    }
+                    if (status === 'waspada') {
+                        return 'medium';
+                    }
+                    return 'bad';
+                },
+                scoreColor(status) {
+                    if (status === 'normal') {
+                        return '#22c55e';
+                    }
+                    if (status === 'waspada') {
+                        return '#f59e0b';
+                    }
+                    return '#ef4444';
+                },
+            };
+        }
+    </script>
 @endsection

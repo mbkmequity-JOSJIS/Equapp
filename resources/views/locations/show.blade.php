@@ -724,10 +724,6 @@
                                 </div>
                                 <span
                                     class="sensor-status {{ $sensor['status'] === 'normal' ? 'good' : ($sensor['status'] === 'waspada' ? 'medium' : 'bad') }}">{{ ucfirst($sensor['status']) }}</span>
-                                <button type="button" class="calibration-button"
-                                    onclick="openCalibrationForm(@js($sensor['label']))">
-                                    <i class="fas fa-vial"></i> Form Kalibrasi
-                                </button>
                             </div>
                         </div>
                     @endforeach
@@ -739,122 +735,61 @@
                     <div class="modal-header">
                         <div>
                             <h2><i class="fas fa-flask"></i> Form Kalibrasi Sensor</h2>
-                            <p>Isi data kalibrasi untuk setiap sensor agar hasil dapat ditrack dan tervalidasi.</p>
+                            <p>Pilih sensor yang ingin dikalibrasi, lalu isi data kalibrasi sesuai sensor.</p>
                         </div>
-                        <button type="button" class="modal-close" onclick="closeCalibrationForm()"><i
-                                class="fas fa-times"></i></button>
+                        <button type="button" class="modal-close" onclick="closeCalibrationForm()"><i class="fas fa-times"></i></button>
                     </div>
-                    <form id="calibrationForm" action="#" method="post"
-                        onsubmit="event.preventDefault(); submitCalibrationForm();">
+                    <form id="calibrationForm" action="#" method="post" onsubmit="event.preventDefault(); submitCalibrationForm();">
                         <div class="modal-section">
-                            <h3>1. Informasi Umum</h3>
+                            <h3>Pilih Sensor</h3>
                             <div class="form-grid">
-                                <label>ID Sensor<input type="text" name="sensor_id" placeholder="Masukkan ID Sensor"
-                                        required></label>
-                                <label>Nama Sensor<input type="text" name="sensor_name" placeholder="Nama Sensor"
-                                        required></label>
-                                <label>Jenis Sensor<select name="sensor_type" required>
-                                        <option value="">Pilih jenis sensor</option>
-                                        <option value="pH">pH</option>
-                                        <option value="DO">DO</option>
-                                        <option value="Suhu">Suhu</option>
-                                        <option value="TDS">TDS</option>
-                                        <option value="Kelembapan">Kelembapan</option>
-                                        <option value="TVOC">TVOC</option>
-                                        <option value="CO2">CO₂</option>
-                                        <option value="UV">UV Index</option>
-                                        <option value="Angin">Kecepatan Angin</option>
-                                        <option value="Curah Hujan">Curah Hujan</option>
-                                    </select></label>
-                                <label>Lokasi Sensor<input type="text" name="sensor_location"
-                                        value="{{ $location['name'] }}" required></label>
-                                <label>Tanggal Kalibrasi<input type="date" name="calibration_date" required></label>
-                                <label>Waktu Kalibrasi<input type="time" name="calibration_time" required></label>
-                                <label>Nama Teknisi / Operator<input type="text" name="technician"
-                                        placeholder="Nama teknisi" required></label>
-                            </div>
-                        </div>
-                        <div class="modal-section">
-                            <h3>2. Parameter Kalibrasi</h3>
-                            <div class="form-grid">
-                                <label>Metode Kalibrasi<select name="calibration_method" required>
-                                        <option value="">Pilih metode</option>
-                                        <option value="Manual">Manual</option>
-                                        <option value="Otomatis">Otomatis</option>
-                                        <option value="Multi-point">Multi-point</option>
-                                    </select></label>
-                                <label>Jumlah Titik Kalibrasi<select name="points" required>
-                                        <option value="">Pilih jumlah</option>
-                                        <option value="1">1 titik</option>
-                                        <option value="2">2 titik</option>
-                                        <option value="3">3 titik</option>
-                                    </select></label>
-                                <label>Nilai Referensi<input type="text" name="reference_value"
-                                        placeholder="Contoh: pH 4.00 / DO 8 mg/L" required></label>
-                                <label>Nilai Sensor (Sebelum)<input type="text" name="before_value"
-                                        placeholder="Nilai sebelum kalibrasi" required></label>
-                                <label>Nilai Sensor (Setelah)<input type="text" name="after_value"
-                                        placeholder="Nilai setelah kalibrasi" required></label>
-                            </div>
-                        </div>
-                        <div class="modal-section">
-                            <h3>3. Perhitungan Kalibrasi</h3>
-                            <div class="form-grid">
-                                <label>Error (Selisih)<input type="text" name="error_value"
-                                        placeholder="Sensor - Referensi"></label>
-                                <label>Correction Factor / Offset<input type="text" name="offset"></label>
-                                <label>Slope (jika linear calibration)<input type="text" name="slope"></label>
-                            </div>
-                        </div>
-                        <div class="modal-section">
-                            <h3>4. Hasil Kalibrasi</h3>
-                            <div class="form-grid">
-                                <label>Status Kalibrasi<select name="calibration_status" required>
-                                        <option value="">Pilih status</option>
-                                        <option value="Berhasil">Berhasil</option>
-                                        <option value="Gagal">Gagal</option>
-                                    </select></label>
-                                <label>Akurasi (% )<input type="number" name="accuracy" min="0" max="100"
-                                        step="0.1" placeholder="Contoh 98.5"></label>
-                                <label>Toleransi<input type="text" name="tolerance" placeholder="Contoh ±0.2"></label>
-                                <label>Catatan Hasil
-                                    <textarea name="notes" rows="2" placeholder="Contoh: sensor masih stabil"></textarea>
+                                <label>Sensor
+                                    <select name="sensor_select" id="sensor_select" onchange="showCalibrationFields()" required>
+                                        <option value="">-- Pilih Sensor --</option>
+                                        <option value="ph">pH</option>
+                                        <option value="do">Dissolved Oxygen (DO)</option>
+                                        <option value="tds">TDS</option>
+                                        <option value="temperature">Suhu</option>
+                                        <option value="turbidity">Turbidity</option>
+                                    </select>
                                 </label>
                             </div>
-                        </div>
-                        <div class="modal-section">
-                            <h3>5. Kondisi Lingkungan</h3>
+                            <h3>Parameter Kalibrasi</h3>
                             <div class="form-grid">
-                                <label>Suhu Lingkungan (°C)<input type="number" name="ambient_temperature"
-                                        step="0.1" placeholder="Contoh 25.4"></label>
-                                <label>Kelembapan (% RH)<input type="number" name="ambient_humidity" step="0.1"
-                                        placeholder="Contoh 72"></label>
-                                <label>Kondisi Air/Udara<select name="environment_condition">
-                                        <option value="">Pilih kondisi</option>
-                                        <option value="Jernih">Jernih</option>
-                                        <option value="Keruh">Keruh</option>
-                                        <option value="Hujan">Hujan</option>
-                                        <option value="Kering">Kering</option>
-                                    </select></label>
-                            </div>
-                        </div>
-                        <div class="modal-section">
-                            <h3>6. Riwayat & Validasi</h3>
-                            <div class="form-grid">
-                                <label>Kalibrasi Sebelumnya (tanggal)<input type="date"
-                                        name="previous_calibration"></label>
-                                <label>Jadwal Kalibrasi Berikutnya<input type="date" name="next_calibration"></label>
-                                <label>Tanda Tangan Digital / Verifikasi<input type="text" name="verification"
-                                        placeholder="Tanda tangan / ID verifikator"></label>
+                                <div id="ph_fields" style="display:none">
+                                    <label>pH - Voltase PH 4<input type="number" name="ph_4" step="0.001" placeholder="Nilai voltase PH 4"></label>
+                                    <label>pH - Voltase PH 6<input type="number" name="ph_6" step="0.001" placeholder="Nilai voltase PH 6"></label>
+                                    <label>pH - Voltase PH 9<input type="number" name="ph_9" step="0.001" placeholder="Nilai voltase PH 9"></label>
+                                </div>
+                                <div id="do_fields" style="display:none">
+                                    <label>DO (Nilai Voltase)<input type="number" name="do_value" step="0.001" placeholder="Nilai voltase DO"></label>
+                                </div>
+                                <div id="tds_fields" style="display:none">
+                                    <label>TDS (K Values)<input type="number" name="tds_k_value" step="0.001" placeholder="Input nilai K Values"></label>
+                                </div>
+                                <div id="temperature_fields" style="display:none">
+                                    <label>Suhu (Offset)<input type="number" name="temperature_offset" step="0.001" placeholder="Nilai offset suhu"></label>
+                                </div>
+                                <div id="turbidity_fields" style="display:none">
+                                    <label>Turbidity (Offset)<input type="number" name="turbidity_offset" step="0.001" placeholder="Nilai offset turbidity"></label>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-actions">
-                            <button type="button" class="button button-secondary"
-                                onclick="closeCalibrationForm()">Batal</button>
+                            <button type="button" class="button button-secondary" onclick="closeCalibrationForm()">Batal</button>
                             <button type="submit" class="button button-primary">Simpan Kalibrasi</button>
                         </div>
                     </form>
                 </div>
+                <script>
+                function showCalibrationFields() {
+                    var selected = document.getElementById('sensor_select').value;
+                    var fields = ['ph', 'do', 'tds', 'temperature', 'turbidity'];
+                    fields.forEach(function(f) {
+                        document.getElementById(f + '_fields').style.display = (selected === f) ? '' : 'none';
+                    });
+                }
+                </script>
             </div>
 
             <div class="chart-section" x-data="locationCharts(@js($location))">
@@ -873,6 +808,15 @@
                     <canvas x-ref="chartCanvas"></canvas>
                 </div>
             </div>
+
+            @if ($location['type'] === 'AQUAVISKA')
+                <div style="position: fixed; bottom: 40px; right: 40px; z-index: 50;">
+                    <button type="button" class="calibration-button" style="width: 180px;"
+                        onclick="openCalibrationForm()">
+                        <i class="fas fa-vial"></i> Form Kalibrasi
+                    </button>
+                </div>
+            @endif
 
             <div class="bottom-grid">
                 <div class="recommendation-card">
@@ -908,7 +852,7 @@
                             <strong>Skor:</strong> {{ $location['condition_score'] }}/100
                         </div>
                     </div>
-                    <a href="https://wa.me/6281234567890?text={{ rawurlencode('Halo Admin EQUITY UP, saya ingin melaporkan kondisi di ' . $location['name'] . ' dengan status ' . $location['status_label'] . '.') }}"
+                    <a href="https://wa.me/{{ config('equapp.admin_whatsapp') }}?text={{ rawurlencode('Halo Admin EQUITY UP, saya ingin melaporkan kondisi di ' . $location['name'] . ' dengan status ' . $location['status_label'] . '.') }}"
                         target="_blank" class="wa-button">
                         <i class="fab fa-whatsapp"></i>
                         Kirim Laporan
@@ -921,25 +865,11 @@
 
 @section('script')
     <script>
-        function openCalibrationForm(sensorLabel) {
+        function openCalibrationForm() {
             const modal = document.getElementById('calibrationFormModal');
             const form = document.getElementById('calibrationForm');
             modal.classList.remove('hidden');
             form.reset();
-            const nameInput = form.querySelector('input[name="sensor_name"]');
-            const typeSelect = form.querySelector('select[name="sensor_type"]');
-            nameInput.value = sensorLabel;
-            typeSelect.value = '';
-            if (sensorLabel.toLowerCase().includes('ph')) typeSelect.value = 'pH';
-            else if (sensorLabel.toLowerCase().includes('do')) typeSelect.value = 'DO';
-            else if (sensorLabel.toLowerCase().includes('suhu')) typeSelect.value = 'Suhu';
-            else if (sensorLabel.toLowerCase().includes('tds')) typeSelect.value = 'TDS';
-            else if (sensorLabel.toLowerCase().includes('kelembapan')) typeSelect.value = 'Kelembapan';
-            else if (sensorLabel.toLowerCase().includes('tvoc')) typeSelect.value = 'TVOC';
-            else if (sensorLabel.toLowerCase().includes('co')) typeSelect.value = 'CO2';
-            else if (sensorLabel.toLowerCase().includes('uv')) typeSelect.value = 'UV';
-            else if (sensorLabel.toLowerCase().includes('angin')) typeSelect.value = 'Angin';
-            else if (sensorLabel.toLowerCase().includes('curah')) typeSelect.value = 'Curah Hujan';
         }
 
         function closeCalibrationForm() {
