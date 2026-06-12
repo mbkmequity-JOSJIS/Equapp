@@ -19,40 +19,28 @@
 <body>
     <div class="flex w-full">
         <nav id="nav-menu"
-            class="sticky top-0 z-0 bg-[#a9cbe0] h-dvh w-1/7 {{ request()->routeIs('welcome') ? 'hover:w-1/2' : 'hover:w-1/5' }} hover:w-1/2 overflow-hidden transition-all duration-300 flex flex-col flex-nowrap items-start pl-10 justify-between py-10 gap-6">
+            class="sticky top-0 z-0 bg-[#a9cbe0] h-dvh w-1/7 hover:w-1/2  transition-all duration-300 flex flex-col flex-nowrap items-start pl-10 justify-between py-10 gap-6">
             <a href="{{ route('home') }}">
                 <img src="{{ asset('logo.png') }}" alt="Equapp Logo" class="h-30">
             </a>
             <div class="flex">
-                @if (request()->routeIs('welcome'))
-                    <ul
-                        class="[&>li]:text-3xl tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white  [&>li]:hover:text-sky-400 [&>li]:hover:text-shadow-slate-600 [&>li]:hover:translate-x-1 [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-2 border-r-2 pr-10 border-white/50">
-                        {{-- sidebar welcome --}}
-                        <li id="feature" class="cursor-pointer">Feature</li>
-                        <li id=""><a href="#sdgs">SDGs</a></li>
-                        <li id=""><a href="#equproject">Equity Projects</a></li>
-                        <li id=""><a href="#about-us">About Us</a></li>
-                        <li id=""><a href="#faq">FAQ</a></li>
-                        <li id=""><a href="#contact">Contact Us</a></li>
-                    </ul>
-                    <ul id="featureMenu"
-                        class="hidden tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white   [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-4 pl-10  pl-10 ">
-                        <li
-                            class="text-3xl opacity-60 hover:opacity-100 hover:text-shadow-slate-600 hover:translate-x-1">
-                            <a href="{{ route('home') }}">Our IOT Monitoring Modul</a>
-                        </li>
-                        <li class="text-xs animate-pulse">---- Coming Soon... ----</li>
-                    </ul>
-                @else
-                    <ul
-                        class="[&>li]:text-3xl tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white  [&>li]:hover:text-sky-400 [&>li]:hover:text-shadow-slate-600  [&>li]:hover:bg-slate-50/10 px-1 py-1.5 rounded-3xl [&>li]:hover:translate-x-1 [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-2 ">
-
-                        {{-- sidebar module --}}
-                        <li><a href="{{ route('welcome') }}" class="">Home</a></li>
-                        <li><a href="#indikator" class="">Indikator</a></li>
-                        <li><a href="{{ route('lokasi') }}" class="">Lokasi & Perangkat</a></li>
-                    </ul>
-                @endif
+                <ul
+                    class="[&>li]:text-3xl tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white  [&>li]:hover:text-sky-400 [&>li]:hover:text-shadow-slate-600 [&>li]:hover:translate-x-1 [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-2 border-r-2 pr-10 border-white/50">
+                    <li id="feature" class="cursor-pointer">Feature</li>
+                    <li id=""><a href="#sdgs">SDGs</a></li>
+                    <li id=""><a href="#equproject">Equity Projects</a></li>
+                    <li id=""><a href="#about-us">About Us</a></li>
+                    <li id=""><a href="#faq">FAQ</a></li>
+                    <li id=""><a href="#contact">Contact Us</a></li>
+                </ul>
+                <ul id="featureMenu"
+                    class="hidden tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white   [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-4 pl-10  pr=l-10 ">
+                    <li class="text-3xl opacity-60 hover:opacity-100 hover:text-shadow-slate-600 hover:translate-x-1"><a
+                            href="/">AQUAVISKA</a></li>
+                    <li class="text-3xl opacity-60 hover:opacity-100 hover:text-shadow-slate-600 hover:translate-x-1"><a
+                            href="/about">CLIMATE</a></li>
+                    <li class="text-xs animate-pulse">---- Coming Soon... ----</li>
+                </ul>
             </div>
             <div class="text-4xl text-white w-full">
                 <i class="fa-solid fa-circle-user"></i>
