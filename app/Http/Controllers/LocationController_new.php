@@ -37,7 +37,7 @@ class LocationController extends Controller
                 'lat' => -7.897071,
                 'lng' => 110.370529,
                 'type' => 'AQUAVISKA',
-                'image' => 'embung-nglanggeran.jpg',
+                'image' => 'dummy_loc (1).jpg',
                 'status' => 'normal',
                 'status_label' => 'Normal',
                 'condition_score' => 86,
@@ -62,7 +62,7 @@ class LocationController extends Controller
                 'lat' => -7.042214,
                 'lng' => 110.402611,
                 'type' => 'IOT Climate',
-                'image' => 'stasiun-klimatologi.png',
+                'image' => 'dummy_loc (3).jpg',
                 'status' => 'waspada',
                 'status_label' => 'Waspada',
                 'condition_score' => 58,
@@ -89,7 +89,7 @@ class LocationController extends Controller
                 'lat' => -6.855194,
                 'lng' => 108.774361,
                 'type' => 'AQUAVISKA',
-                'image' => 'daerah-irigasi.jpg',
+                'image' => 'dummy_loc (2).jpg',
                 'status' => 'bahaya',
                 'status_label' => 'Bahaya / Offline',
                 'condition_score' => 24,
@@ -97,9 +97,9 @@ class LocationController extends Controller
                 'sensors' => [
                     ['label' => 'Suhu Air', 'value' => '24.1', 'unit' => '°C', 'status' => 'waspada', 'pct' => 35],
                     ['label' => 'pH', 'value' => '', 'unit' => '', 'status' => 'bahaya', 'pct' => 0],
-                    ['label' => 'Kekeruhan', 'value' => '�', 'unit' => 'NTU', 'status' => 'bahaya', 'pct' => 0],
-                    ['label' => 'Dissolved Oxygen (DO)', 'value' => '�', 'unit' => 'mg/L', 'status' => 'bahaya', 'pct' => 0],
-                    ['label' => 'Total Dissolved Solids (TDS)', 'value' => '�', 'unit' => 'ppm', 'status' => 'bahaya', 'pct' => 0],
+                    ['label' => 'Kekeruhan', 'value' => '–', 'unit' => 'NTU', 'status' => 'bahaya', 'pct' => 0],
+                    ['label' => 'Dissolved Oxygen (DO)', 'value' => '–', 'unit' => 'mg/L', 'status' => 'bahaya', 'pct' => 0],
+                    ['label' => 'Total Dissolved Solids (TDS)', 'value' => '–', 'unit' => 'ppm', 'status' => 'bahaya', 'pct' => 0],
                 ],
                 'chart' => [
                     '6' => ['labels' => ['-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'data' => [7.1, 6.9, 6.4, 5.8, 4.2, 0]],
@@ -109,9 +109,6 @@ class LocationController extends Controller
             ],
         ];
     }
-
-    
-    
 
     public function index(): View
     {

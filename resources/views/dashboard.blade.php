@@ -142,31 +142,31 @@
                             <th>Keterangan</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="aquaviska-indicators">
                         <tr class="indicator-category">
                             <td colspan="3">AQUA VISKA – Sensor Kualitas Air</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="temperature">
                             <td>Suhu Air</td>
                             <td>°C</td>
                             <td>Temperatur air permukaan yang diukur di lokasi.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="ph">
                             <td>pH</td>
                             <td>skala 0–14</td>
                             <td>Tingkat keasaman atau kebasaan air tanpa satuan.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="turbidity">
                             <td>Kekeruhan (Turbidity)</td>
                             <td>NTU</td>
                             <td>Seberapa keruh air; nilai lebih tinggi berarti air lebih keruh.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="do">
                             <td>Dissolved Oxygen (DO)</td>
                             <td>mg/L</td>
                             <td>Jumlah oksigen terlarut yang tersedia di dalam air.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="tds">
                             <td>Total Dissolved Solids (TDS)</td>
                             <td>ppm</td>
                             <td>Kadar mineral dan zat terlarut dalam air.</td>
@@ -175,37 +175,37 @@
                         <tr class="indicator-category">
                             <td colspan="3">IOT CLIMATE – Sensor Kualitas Udara & Iklim</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="air_temp">
                             <td>Suhu Udara</td>
                             <td>°C</td>
                             <td>Temperatur udara di sekitar lokasi sensor.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="humidity">
                             <td>Kelembapan</td>
                             <td>% RH</td>
                             <td>Persentase uap air di udara.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="tvoc">
                             <td>TVOC</td>
                             <td>mg/m³</td>
                             <td>Kadar senyawa organik volatil di udara.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="co2">
                             <td>CO₂</td>
                             <td>ppm</td>
                             <td>Kadar karbon dioksida di udara.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="uv_index">
                             <td>UV Index</td>
                             <td>skala</td>
                             <td>Intensitas sinar ultraviolet yang mencapai permukaan.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="wind_speed">
                             <td>Kecepatan Angin</td>
                             <td>m/s</td>
                             <td>Kecepatan angin di sekitar area sensor.</td>
                         </tr>
-                        <tr>
+                        <tr data-indicator="rainfall">
                             <td>Curah Hujan</td>
                             <td>mm</td>
                             <td>Jumlah hujan yang tercatat dalam periode tertentu.</td>

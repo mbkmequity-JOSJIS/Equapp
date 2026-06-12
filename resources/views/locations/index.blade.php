@@ -3,6 +3,7 @@
 {{-- resources/views/locations/index.blade.php --}}
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @section('style')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <style>
         /* CONTENT */
         .content {
@@ -280,6 +281,13 @@
             font-size: 8px;
         }
     </style>
+    <style>
+        #locationsMap {
+            height: 20rem;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -297,6 +305,7 @@
                 </div>
             </div>
 
+
             <div class="filter-bar">
                 <div class="filter-tabs">
                     <button type="button" @click="activeTab = 'semua'"
@@ -312,7 +321,7 @@
                     <button type="button" @click="activeTab = 'iot'"
                         :class="activeTab === 'iot' ? 'filter-tab active iot' : 'filter-tab'">
                         <i class="fas fa-cloud-sun"></i>
-                        IoT Climate
+                            CLIMEET
                     </button>
                 </div>
 
@@ -377,6 +386,15 @@
                 style="margin-top: 20px; padding: 16px; border-radius: 10px; background: #f8fafc; color: #475569;">
                 Data lokasi tidak ditemukan untuk filter/pencarian saat ini.
             </div>
+
+            <!-- MAP: lokasi pemasangan -->
+            <div class="mt-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3">Peta Lokasi Pemasangan</h3>
+                    <div id="locationsMap"></div>
+                </div>
+            </div>
+
         </div>
     </main>
 @endsection
