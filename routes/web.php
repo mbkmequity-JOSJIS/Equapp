@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Api\BmkgProxyController;
+use App\Http\Controllers\Api\IndicatorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ModulController;
 use App\Http\Controllers\AuthController;

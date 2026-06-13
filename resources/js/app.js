@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Alpine from 'alpinejs';
 import Chart from 'chart.js/auto';
+import './location-sensor-updater-firebase';
 
 gsap.registerPlugin(ScrollTrigger);
 

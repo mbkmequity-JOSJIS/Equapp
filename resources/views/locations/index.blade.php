@@ -3,6 +3,7 @@
 {{-- resources/views/locations/index.blade.php --}}
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @section('style')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <style>
         /* CONTENT */
         .content {
@@ -280,6 +281,13 @@
             font-size: 8px;
         }
     </style>
+    <style>
+        #locationsMap {
+            height: 20rem;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -296,6 +304,7 @@
                 </div>
             </div>
 
+
             <div class="filter-bar">
                 <div class="filter-tabs">
                     <button type="button" @click="activeTab = 'semua'"
@@ -311,7 +320,7 @@
                     <button type="button" @click="activeTab = 'iot'"
                         :class="activeTab === 'iot' ? 'filter-tab active iot' : 'filter-tab'">
                         <i class="fas fa-cloud-sun"></i>
-                        IoT Climate
+                            CLIMEET
                     </button>
                 </div>
 
@@ -337,8 +346,8 @@
                         x-show="activeTab === 'semua' || (activeTab === 'aquaviska' && '{{ $loc['type'] }}' === 'AQUAVISKA') || (activeTab === 'iot' && '{{ $loc['type'] }}' === 'IOT Climate')"
                         x-cloak>
                         <div class="card-image-wrap">
-                            <img src="{{ asset('storage/img_loc/' . $loc['image']) }}"
-                                alt="{{ $loc['name'] }}" class="card-image">
+                            <img src="{{ asset('storage/img_loc/' . $loc['image']) }}" alt="{{ $loc['name'] }}"
+                                class="card-image">
                             <div class="card-device-badge {{ strtolower(str_replace(' ', '_', $loc['type'])) }}">
                                 <i class="fas fa-{{ $loc['type'] === 'AQUAVISKA' ? 'water' : 'cloud-sun' }}"></i>
                                 {{ $loc['type'] }}
@@ -377,6 +386,62 @@
                     </a>
                 @endforeach
             </div>
+
+            <!-- MAP: lokasi pemasangan -->
+            <div class="mt-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-3">Peta Lokasi Pemasangan</h3>
+                    <div id="locationsMap"></div>
+                </div>
+            </div>
+
         </div>
     </main>
+@endsection
+
+
+@section('script')
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationsData = {!! json_encode($locations ?? []) !!};
+            const mapEl = document.getElementById('locationsMap');
+            if (!mapEl) return;
+
+            const map = L.map('locationsMap').setView([-2.5, 118], 5);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '© CartoDB',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Tambah layer untuk menampilkan nama wilayah/label
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only/{z}/{x}/{y}{r}.png', {
+                attribution: '© CartoDB',
+                maxZoom: 19
+            }).addTo(map);
+
+            const bounds = [];
+            locationsData.forEach(loc => {
+                if (loc.lat && loc.lng) {
+                    const lat = parseFloat(loc.lat);
+                    const lng = parseFloat(loc.lng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const marker = L.marker([lat, lng]).addTo(map);
+                        const popup = `<strong>${loc.name ?? ''}</strong><br>${loc.address ?? ''}`;
+                        marker.bindPopup(popup);
+                        bounds.push([lat, lng]);
+                    }
+                } else {
+                    console.warn('Lokasi tanpa koordinat:', loc);
+                }
+            });
+
+            if (bounds.length) {
+                map.fitBounds(bounds, {
+                    padding: [40, 40]
+                });
+            }
+        });
+
+    </script>
 @endsection

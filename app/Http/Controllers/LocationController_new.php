@@ -6,7 +6,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Services\FirebaseService;
 
-class ModulController extends Controller
+class LocationController extends Controller
 {
     protected FirebaseService $firebase;
 
@@ -97,9 +97,9 @@ class ModulController extends Controller
                 'sensors' => [
                     ['label' => 'Suhu Air', 'value' => '24.1', 'unit' => '°C', 'status' => 'waspada', 'pct' => 35],
                     ['label' => 'pH', 'value' => '', 'unit' => '', 'status' => 'bahaya', 'pct' => 0],
-                    ['label' => 'Kekeruhan', 'value' => '�', 'unit' => 'NTU', 'status' => 'bahaya', 'pct' => 0],
-                    ['label' => 'Dissolved Oxygen (DO)', 'value' => '�', 'unit' => 'mg/L', 'status' => 'bahaya', 'pct' => 0],
-                    ['label' => 'Total Dissolved Solids (TDS)', 'value' => '�', 'unit' => 'ppm', 'status' => 'bahaya', 'pct' => 0],
+                    ['label' => 'Kekeruhan', 'value' => '–', 'unit' => 'NTU', 'status' => 'bahaya', 'pct' => 0],
+                    ['label' => 'Dissolved Oxygen (DO)', 'value' => '–', 'unit' => 'mg/L', 'status' => 'bahaya', 'pct' => 0],
+                    ['label' => 'Total Dissolved Solids (TDS)', 'value' => '–', 'unit' => 'ppm', 'status' => 'bahaya', 'pct' => 0],
                 ],
                 'chart' => [
                     '6' => ['labels' => ['-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'data' => [7.1, 6.9, 6.4, 5.8, 4.2, 0]],
@@ -109,9 +109,6 @@ class ModulController extends Controller
             ],
         ];
     }
-
-    
-    
 
     public function index(): View
     {
