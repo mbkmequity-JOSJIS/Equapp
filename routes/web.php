@@ -28,15 +28,25 @@ Route::get('/', function () {
 
 
 // Auth Routes
-Route::get('/login', [AuthController::class, 'index'])->name('login.view');
+Route::get('/login', [AuthController::class, 'index'])->name('login.index');
+Route::post('/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
+
 
 // Admin Routes
-Route::get('/admin', [AdminController::class, 'index'])->name('admin.home');
+Route::middleware('auth')->group(function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('index');
+        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+});
+
 
 
 // Modul Routes 
-Route::get('/modul/', [DashboardController::class, 'index'])->name('home.modul');
-Route::get('/modul/lokasi', [ModulController::class, 'index'])->name('lokasi.modul');
-Route::get('/modul/perangkat', [ModulController::class, 'index'])->name('perangkat.modul');
-Route::get('/modul/lokasi/{id}', [ModulController::class, 'show'])->name('location.detail.modul');
-Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');
+Route::middleware('guest')->group(function () {
+    Route::get('/modul/', [DashboardController::class, 'index'])->name('home.modul');
+    Route::get('/modul/lokasi', [ModulController::class, 'index'])->name('lokasi.modul');
+    Route::get('/modul/perangkat', [ModulController::class, 'index'])->name('perangkat.modul');
+    Route::get('/modul/lokasi/{id}', [ModulController::class, 'show'])->name('location.detail.modul');
+    Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');
+});

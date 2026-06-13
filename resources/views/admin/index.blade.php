@@ -67,7 +67,11 @@
         <div
             class="absolute top-0 left-0 right-0 bg-orange-500/40 text-white p-2 text-center flex text-xl justify-center items-center gap-3">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            <span class="font-semibold tracking-wider">Admin Side</span>
+            @if (Session::has('firebase_user') && Session::get('firebase_user')['role'] === 'admin')
+                    <span class="font-semibold tracking-wider">Admin Side</span>
+                @else
+                <span class="font-semibold tracking-wider">Operator Side</span>
+            @endif
         </div>
 
         <!-- Page Header -->

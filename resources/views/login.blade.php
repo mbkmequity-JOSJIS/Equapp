@@ -35,28 +35,30 @@
         <div
             class="w-full lg:w-2/3 relative flex items-center justify-center p-8 bg-white shadow-black/20 shadow-[-10px_0px_20px_20px_rgba(255,255,255,0.5)]">
             <div
-                class="absolute top-0 left-0 right-0 bg-orange-500/60 text-white p-2 text-center flex text-xl justify-center items-center gap-3">
+                class="absolute top-0 left-0 right-0 bg-green-500/60 text-white p-2 text-center flex text-xl justify-center items-center gap-3">
                 <i class="fa-solid fa-triangle-exclamation"></i>
-                <span class="font-semibold tracking-wider">Admin Side</span>
+                <span class="font-semibold tracking-wider">Device Management Portal</span>
             </div>
             <div class="max-w-md w-full relative">
                 <div class="">
-                    <a href="{{ route('home.modul') }}"  class="flex items-center gap-2 opacity-40 hover:opacity-100 group absolute -top-6 left-0 text-sm text-gray-600 hover:text-gray-800 transition">
-                        <i class="fa-solid fa-arrow-left text-lg group-hover:-translate-x-1.5 transition-all duration-500"></i>
+                    <a href="{{ route('home.modul') }}"
+                        class="flex items-center gap-2 opacity-40 hover:opacity-100 group absolute -top-6 left-0 text-sm text-gray-600 hover:text-gray-800 transition">
+                        <i
+                            class="fa-solid fa-arrow-left text-lg group-hover:-translate-x-1.5 transition-all duration-500"></i>
                         <span>Module</span>
                     </a>
                 </div>
                 <div class="text-center lg:text-left mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 tracking-wide">Welcome Admin</h2>
-                    <p class="text-gray-500 mt-2">Please sign in to your account</p>
+                    <h2 class="text-3xl font-bold text-gray-800 tracking-wide">Welcome to Device Management Portal</h2>
+                    {{-- <p class="text-gray-500 mt-2">Please sign in to your account</p> --}}
                 </div>
 
-                <form action="" method="POST" class="space-y-5">
+                <form action="{{ route('login.authenticate') }}" method="POST" class="space-y-5">
                     @csrf
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" required
+                        <input type="email" name="email" value="{{ old('email') }}" required
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                             placeholder="name@example.com">
                     </div>
@@ -68,30 +70,23 @@
                             placeholder="••••••••">
                     </div>
 
-                    <div class="flex items-center justify-between">
+                    {{-- <div class="flex items-center justify-between">
                         <label class="flex items-center">
                             <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                             <span class="ml-2 text-sm text-gray-600">Remember me</span>
                         </label>
                         <a href="#" class="text-sm text-blue-600 hover:text-blue-700">Forgot password?</a>
-                    </div>
+                    </div> --}}
 
                     <button type="submit"
-                        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition">
+                        class="w-full py-3  bg-blue-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition">
                         Login
                     </button>
                 </form>
-
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-600">
-                        New to EQUapp?
-                        <a href="" class="text-blue-600 hover:text-blue-700 font-semibold">Create
-                            account</a>
-                    </p>
-                </div>
             </div>
         </div>
     </div>
+    @include('partials.sweetalert-toast')
 </body>
 
 </html>
