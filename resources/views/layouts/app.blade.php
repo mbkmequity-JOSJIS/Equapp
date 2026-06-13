@@ -20,7 +20,7 @@
     <div class="flex w-full">
         <nav id="nav-menu"
             class="sticky top-0 z-0 bg-[#a9cbe0] h-dvh w-1/7 {{ request()->routeIs('welcome') ? 'hover:w-1/2' : 'hover:w-1/5' }} hover:w-1/2 overflow-hidden transition-all duration-300 flex flex-col flex-nowrap items-start pl-10 justify-between py-10 gap-6">
-            <a href="{{ route('home') }}">
+            <a href="{{ route('home.modul') }}">
                 <img src="{{ asset('logo.png') }}" alt="Equapp Logo" class="h-30">
             </a>
             <div class="flex">
@@ -39,7 +39,7 @@
                         class="hidden tracking-wider font-semibold [&>li]:whitespace-nowrap [&>li]:text-white   [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500 flex flex-col gap-4 pl-10  pl-10 ">
                         <li
                             class="text-3xl opacity-60 hover:opacity-100 hover:text-shadow-slate-600 hover:translate-x-1">
-                            <a href="{{ route('home') }}">Our IOT Monitoring Modul</a>
+                            <a href="{{ route('home.modul') }}">Our IOT Monitoring Modul</a>
                         </li>
                         <li class="text-xs animate-pulse">---- Coming Soon... ----</li>
                     </ul>
@@ -49,18 +49,24 @@
 
                         {{-- sidebar module --}}
                         <li><a href="{{ route('welcome') }}" class="flex items-center gap-2 opacity-40 hover:opacity-100"><i class="fa-solid fa-arrow-left text-lg "></i><span class="text-lg">back</span></a></li>
-                        <li><a href="{{ route('home') }}" class="">Home</a></li>
+                        <li><a href="{{ route('home.modul') }}" class="">Home</a></li>
                         <li><a href="#indikator" class="">Indikator</a></li>
                         <span class="text-sm bg-slate-50/20 px-2 py-1.5 text-white mt-1.5">IOT Module Feature</span>
                         <hr class="p-0 m-0 mt-2 border-slate-100/40">
-                        <li><a href="{{ route('lokasi') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-location-arrow"></i> Lokasi</a></li>
-                        <li><a href="{{ route('perangkat') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-microchip"></i> Perangkat</a></li>
+                        <li><a href="{{ route('lokasi.modul') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-location-arrow"></i> Lokasi</a></li>
+                        <li><a href="{{ route('perangkat.modul') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-microchip"></i> Perangkat</a></li>
                     </ul>
                 @endif
             </div>
-            <div class="text-4xl text-white w-full">
-                <i class="fa-solid fa-circle-user"></i>
-            </div>
+            @if (request()->routeIs('admin.*'))
+                <div class="text-4xl text-red-500 w-full hover:text-slate-400 hover:text-shadow-slate-600 transition-all duration-500">
+                    <a href="{{ route('admin.logout') }}"><i class="fa-solid fa-power-off"></i></a>
+                </div>
+            @else
+                <div class="text-4xl text-white w-full hover:text-slate-400 hover:text-shadow-slate-600 transition-all duration-500">
+                    <a href="{{ route('login.index') }}"><i class="fa-solid fa-circle-user"></i></a>
+                </div>
+            @endif
         </nav>
 
         <main class="w-full z-50 [&>section]:box-border relative flex-1 shrink-0 shadow-2xl shadow-sky-500 ">
@@ -85,6 +91,7 @@
         // });
     });
 </script>
+@include('partials.sweetalert-toast')
 @yield('script')
 
 </html>

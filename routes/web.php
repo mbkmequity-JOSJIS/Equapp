@@ -4,7 +4,9 @@
 use App\Http\Controllers\Api\BmkgProxyController;
 use App\Http\Controllers\Api\IndicatorController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ModulController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Factory;
 
@@ -25,19 +27,27 @@ Route::get('/', function () {
     return view('index');
 })->name('welcome');
 
-Route::get('/modul/', [DashboardController::class, 'index'])->name('home');
 
-Route::get('/modul/lokasi', [LocationController::class, 'index'])->name('lokasi');
-Route::get('/modul/perangkat', [LocationController::class, 'index'])->name('perangkat');
-Route::get('/modul/lokasi/{id}', [LocationController::class, 'show'])->name('location.detail');
-Route::get('/modul/api/sensor-data', [LocationController::class, 'getSensorData'])->name('api.sensor.data');
-Route::get('/modul/api/location/{id}', [LocationController::class, 'getLocationDetail'])->name('api.location.detail');
+// Auth Routes
+Route::get('/login', [AuthController::class, 'index'])->name('login.index');
+Route::post('/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
 
-Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');
 
-// API Routes for Indicators
-Route::prefix('/api/indicators')->group(function () {
-    Route::get('/aquaviska/{area?}', [IndicatorController::class, 'aquaviska'])->name('api.indicators.aquaviska');
-    Route::get('/location/{locationId}', [IndicatorController::class, 'location'])->name('api.indicators.location');
-    Route::get('/iot-climate/{locationId?}', [IndicatorController::class, 'iotClimate'])->name('api.indicators.iotClimate');
+// Admin Routes
+Route::middleware('auth')->group(function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('index');
+        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+});
+
+
+
+// Modul Routes 
+Route::middleware('guest')->group(function () {
+    Route::get('/modul/', [DashboardController::class, 'index'])->name('home.modul');
+    Route::get('/modul/lokasi', [ModulController::class, 'index'])->name('lokasi.modul');
+    Route::get('/modul/perangkat', [ModulController::class, 'index'])->name('perangkat.modul');
+    Route::get('/modul/lokasi/{id}', [ModulController::class, 'show'])->name('location.detail.modul');
+    Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');
 });
