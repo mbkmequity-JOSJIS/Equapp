@@ -6,7 +6,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use App\Services\FirebaseService;
 
-class LocationController extends Controller
+class ModulController extends Controller
 {
     protected array $deviceDataInfo = [];
     

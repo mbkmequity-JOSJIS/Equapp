@@ -63,9 +63,15 @@
                     </ul>
                 @endif
             </div>
-            <div class="text-4xl text-white w-full">
-                <i class="fa-solid fa-circle-user"></i>
-            </div>
+            @if (request()->routeIs('admin.*'))
+                <div class="text-4xl text-red-500 w-full hover:text-slate-400 hover:text-shadow-slate-600 transition-all duration-500">
+                    <a href="{{ route('admin.logout') }}"><i class="fa-solid fa-power-off"></i></a>
+                </div>
+            @else
+                <div class="text-4xl text-white w-full hover:text-slate-400 hover:text-shadow-slate-600 transition-all duration-500">
+                    <a href="{{ route('login.index') }}"><i class="fa-solid fa-circle-user"></i></a>
+                </div>
+            @endif
         </nav>
 
         <main class="w-full z-50 [&>section]:box-border relative flex-1 shrink-0 shadow-2xl shadow-sky-500 ">
@@ -90,6 +96,7 @@
         // });
     });
 </script>
+@include('partials.sweetalert-toast')
 @yield('script')
 
 </html>

@@ -81,8 +81,8 @@ class DashboardController extends Controller
         // pemetaan unit untuk satuan sensor
         $unitMapping = [
             'temperature' => '°C',
-            'humidity' => '%',
-            'pressure' => 'hPa',
+            'kelembaban' => '%',
+            'tekanan' => 'hPa',
             'flow' => 'L/min',
             'level' => 'm',
             'do' => 'mg/L',
@@ -91,7 +91,9 @@ class DashboardController extends Controller
             'ph' => '',
             'pm25' => 'µg/m³',
             'pm10' => 'µg/m³',
-            'uv' => 'index',
+            'uvIndex' => 'index',
+            'intensitasHujan' => 'mm/h',
+            'kecepatanAngin' => 'm/s',
         ];
 
         // Data sensor slides dari Firebase (real data)
@@ -102,6 +104,7 @@ class DashboardController extends Controller
             if (isset($device['location']['latitude']) && isset($device['location']['longitude'])) {
                 $sensors = [];
                 $latestData = $deviceDataMonitoring[$device['device_code'] ?? ''] ?? [];
+                // dd($latestData);
                 foreach ($latestData['latest'] as $key => $value) {
                     $sensorInfo = $this->getSensorInfo($key, $value, $module);
                     if ($sensorInfo) {
@@ -279,10 +282,12 @@ class DashboardController extends Controller
             'tds' => ['icon' => 'fa-tint', 'color' => 'text-cyan-500', 'bar' => 'bg-cyan-500', 'max' => 1000, 'unit' => 'ppm'],
             'turbidity' => ['icon' => 'fa-eye', 'color' => 'text-amber-500', 'bar' => 'bg-amber-500', 'max' => 100, 'unit' => 'NTU'],
             'do' => ['icon' => 'fa-wind', 'color' => 'text-blue-500', 'bar' => 'bg-blue-500', 'max' => 10, 'unit' => 'mg/L'],
-            'humidity' => ['icon' => 'fa-droplet', 'color' => 'text-sky-500', 'bar' => 'bg-sky-500', 'max' => 100, 'unit' => '%'],
+            'kelembaban' => ['icon' => 'fa-droplet', 'color' => 'text-sky-500', 'bar' => 'bg-sky-500', 'max' => 100, 'unit' => '%'],
             'pm25' => ['icon' => 'fa-smog', 'color' => 'text-slate-500', 'bar' => 'bg-slate-500', 'max' => 500, 'unit' => 'µg/m³'],
             'pm10' => ['icon' => 'fa-cloud', 'color' => 'text-slate-400', 'bar' => 'bg-slate-400', 'max' => 500, 'unit' => 'µg/m³'],
-            'uv' => ['icon' => 'fa-sun', 'color' => 'text-amber-500', 'bar' => 'bg-amber-500', 'max' => 15, 'unit' => 'index'],
+            'uvIndex' => ['icon' => 'fa-sun', 'color' => 'text-amber-500', 'bar' => 'bg-amber-500', 'max' => 15, 'unit' => 'index'],
+            'intensitasHujan' => ['icon' => 'fa-cloud-showers-heavy', 'color' => 'text-blue-600', 'bar' => 'bg-blue-600', 'max' => 50, 'unit' => 'mm/h'],
+            'kecepatanAngin' => ['icon' => 'fa-wind', 'color' => 'text-gray-500', 'bar' => 'bg-gray-500', 'max' => 30, 'unit' => 'm/s'],
         ];
 
         $keyLower = strtolower($key);
@@ -310,7 +315,7 @@ class DashboardController extends Controller
         $chartData = [];
         $sensors = $module === 'aquaviska' 
             ? ['ph', 'temperature', 'tds', 'turbidity', 'do']
-            : ['temperature', 'humidity', 'pm25', 'pm10', 'uv'];
+            : ['temperature', 'kelembaban', 'pm25', 'pm10', 'uvIndex', 'intensitasHujan', 'kecepatanAngin'];
         
         foreach ($sensors as $sensor) {
             $total = 0;

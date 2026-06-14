@@ -17,6 +17,7 @@
     "dependencies": {
         "alpinejs": "^3.14.8",
         "chart.js": "^4.4.8",
+        "firebase": "^12.13.0",
         "gsap": "^3.14.2"
     }
 }

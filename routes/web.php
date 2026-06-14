@@ -2,9 +2,13 @@
 
 
 use App\Http\Controllers\Api\BmkgProxyController;
+use App\Http\Controllers\Api\IndicatorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\ModulController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Factory;
 
@@ -25,6 +29,20 @@ Route::get('/', function () {
     return view('index');
 })->name('welcome');
 
+// Auth Routes
+Route::get('/login', [AuthController::class, 'index'])->name('login.index');
+Route::post('/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
+
+
+// Admin Routes
+Route::middleware('auth')->group(function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('index');
+        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+});
+
+
 
 
 Route::middleware(['guest'])->group(function () {
@@ -40,8 +58,6 @@ Route::middleware(['guest'])->group(function () {
     // locations Routes
     Route::get('/modul/locations', [LocationController::class, 'index'])->name('locations');
     Route::get('/modul/locations/{id}', [LocationController::class, 'show'])->name('location.detail');
-    Route::get('/modul/api/sensor-data', [LocationController::class, 'getSensorData'])->name('api.sensor.data');
-    Route::get('/modul/api/location/{id}', [LocationController::class, 'getLocationDetail'])->name('api.location.detail');
 
     // dashboard
     Route::get('/modul/{module}', [DashboardController::class, 'dashboard'])->name('module');
@@ -67,3 +83,8 @@ Route::middleware(['guest'])->group(function () {
         return response()->json($result);
     });
 });
+
+
+
+
+
