@@ -1,405 +1,612 @@
 @extends('layouts.app')
 @section('title', 'Dashboard Module')
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+
+@php
+    $activeModule = $dashboard['key'];
+    $isAqua = $activeModule === 'aquaviska';
+    $surfaceClass = $isAqua
+        ? 'bg-gradient-to-br from-cyan-50 via-white to-sky-50'
+        : 'bg-gradient-to-br from-orange-50 via-white to-amber-50';
+    $badgeClass = $isAqua
+        ? 'border-cyan-200 bg-cyan-50 text-cyan-700'
+        : 'border-orange-200 bg-orange-50 text-orange-700';
+    $buttonClass = $isAqua
+        ? 'border-cyan-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100'
+        : 'border-orange-200 bg-orange-50 text-orange-800 hover:bg-orange-100';
+    $iconBoxClass = $isAqua ? 'bg-cyan-50 text-cyan-700' : 'bg-orange-50 text-orange-700';
+    $sectionTitleClass = $isAqua ? 'text-cyan-700' : 'text-orange-700';
+    $pillClass = $isAqua
+        ? 'border-cyan-200 bg-cyan-50 text-cyan-700'
+        : 'border-orange-200 bg-orange-50 text-orange-700';
+    $graphClass = $isAqua ? 'from-cyan-400 to-cyan-600' : 'from-orange-400 to-orange-600';
+    $chartLineColor = $isAqua ? '#06b6d4' : '#f97316';
+@endphp
 
 @section('style')
     <style>
-
-        body {
-            background: #fff;
-            color: #222;
-            overflow-x: hidden;
-        }
-
-        .layout {
-            display: flex;
-            min-height: 100vh;
-        }
-
-
-        /* CONTENT */
-        .content {
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 320px;
             width: 100%;
         }
 
-        section {
-            min-height: 100vh;
-            padding: 0 40px;
-            display: none;
-            animation: fade .4s ease;
+        /* Sensor preview card hover effect */
+        .sensor-preview-card {
+            transition: all 0.3s ease;
         }
 
-        section.active {
-            display: block;
+        .sensor-preview-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        @keyframes fade {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Mini progress bar animation */
+        .sensor-progress-bar {
+            transition: width 0.5s ease;
         }
 
-        .section-bar {
-            height: 35px;
-            line-height: 35px;
+        /* Tooltip custom */
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            font-weight: bold;
-            letter-spacing: 2px;
-            padding-left: 35px;
-            margin-bottom: 50px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            pointer-events: none;
+            z-index: 10;
+            white-space: nowrap;
         }
 
-        .blue {
-            background: linear-gradient(90deg, #6ee89a, #95d6f4);
+        /* Custom scrollbar untuk sensor list */
+        .sensor-grid {
+            max-height: 280px;
+            overflow-y: auto;
+            scrollbar-width: thin;
         }
 
-        .green {
-            background: linear-gradient(90deg, #95d6f4, #6ee89a);
+        .sensor-grid::-webkit-scrollbar {
+            width: 4px;
         }
 
-        .orange {
-            background: linear-gradient(90deg, #6ee89a, #ffc176);
+        .sensor-grid::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
         }
 
-        /* SDGS */
-        .sdgs-wrap {
-            display: flex;
-            align-items: start;
-            gap: 70px;
-            /* background: #9bd8f2; */
-            padding: 90px 70px;
-            min-height: 85vh;
+        .sensor-grid::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
         }
-
-        .sdgs-wrap img {
-            width: 420px;
-        }
-
-
-        .sdgs-text h3 {
-            font-size: 28px;
-            color: #3e5870;
-            margin-bottom: 30px;
-        }
-
-        .sdgs-text p {
-            font-size: 26px;
-            line-height: 1.45;
-            color: white;
-            max-width: 850px;
-        }
-
-
-        .indicator-section {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-            margin-bottom: 40px;
-        }
-
-        .indicator-section h2 {
-            font-size: 28px;
-            margin-bottom: 12px;
-            color: #0f172a;
-        }
-
-        .indicator-section p {
-            color: #475569;
-            line-height: 1.75;
-            margin-bottom: 30px;
-            max-width: 760px;
-        }
-
-        .indicator-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 15px;
-            color: #0f172a;
-        }
-
-        .indicator-table th,
-        .indicator-table td {
-            padding: 16px 18px;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-            vertical-align: top;
-        }
-
-        .indicator-table th {
-            background: #f8fafc;
-            color: #334155;
-            font-weight: 700;
-        }
-
-        .indicator-table tr:hover {
-            background: #f8fafc;
-        }
-
-        .indicator-category {
-            background: #eff6ff;
-            color: #1d4ed8;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .status-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .status-chip.green {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-chip.yellow {
-            background: #fef9c3;
-            color: #92400e;
-        }
-
-        .status-chip.red {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .status-chip.loading {
-            background: #f3f4f6;
-            color: #6b7280;
-            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        .status-chip.good {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-chip.medium {
-            background: #fef9c3;
-            color: #92400e;
-        }
-
-        .status-chip.bad {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-
     </style>
 @endsection
 
-
-
 @section('content')
-    <main class="content">
+    <div class="relative min-h-screen overflow-hidden bg-gradient-to-br {{ $surfaceClass }} text-slate-800">
+        <div class="pointer-events-none absolute inset-0">
+            <div class="absolute -left-32 -top-24 h-72 w-72 rounded-full bg-cyan-300/25 blur-3xl"></div>
+            <div class="absolute -right-32 top-40 h-80 w-80 rounded-full bg-emerald-300/20 blur-3xl"></div>
+            <div class="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-amber-200/25 blur-3xl"></div>
+        </div>
 
-        <section id="feature" class="active relative">
-            <div class="p-10 -z-10 absolute inset-0 bg-cover bg-left w-[97%] h-full bg-no-repeat opacity-60" style="background-image: url({{ asset('images/full-team.png') }});"></div>
-            <div class="sdgs-wrap">
-                <div class="sdgs-text bg-white/10 p-10 rounded-lg shadow-lg backdrop-blur-sm">
-                    <h1 class="font-black tracking-wider text-[6rem] text-slate-500/90">EQUApp</h1>
-                    <h3>Environmental Quality Application</h3>
-                    <p>
-                        A web-based IoT monitoring platform for real-time environmental
-                        quality tracking, especially water and air quality.
-                    </p>
+        <div class="relative mx-auto px-4 sm:px-6 py-6 lg:px-8 lg:py-8 max-w-7xl">
+            <!-- Header Card -->
+            <div
+                class="mb-6 rounded-2xl sm:rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-6 shadow-xl shadow-slate-200/70 backdrop-blur-xl">
+                <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="max-w-3xl">
+                        <h1 class="mt-3 sm:mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">
+                            Dashboard <span
+                                class="uppercase tracking-widest {{ $dashboard['label'] == 'Climeet' ? 'bg-orange-400' : 'bg-cyan-500' }} text-white shadow-md px-2 py-1 rounded-md">{{ $dashboard['label'] }}</span>
+                        </h1>
+                        <p
+                            class="mt-2 sm:mt-4 max-w-2xl text-xs sm:text-sm lg:text-base leading-6 sm:leading-7 text-slate-600">
+                            {{ $dashboard['subtitle'] }}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                        <a href="#wilayah"
+                            class="rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold transition hover:-translate-y-0.5 {{ $buttonClass }} text-center">
+                            <i class="fa-solid fa-map-location-dot mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Grafik</span> Wilayah
+                        </a>
+                        <a href="#alat"
+                            class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 text-center">
+                            <i class="fa-solid fa-microchip mr-1 sm:mr-2"></i>
+                            Status Alat
+                        </a>
+                        <a href="#mitigasi"
+                            class="rounded-xl sm:rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold text-amber-800 transition hover:-translate-y-0.5 hover:bg-amber-100 text-center">
+                            <i class="fa-solid fa-shield-halved mr-1 sm:mr-2"></i>
+                            Mitigasi AI
+                        </a>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <section id="indikator" class="active">
-
-            <div class="indicator-section">
-                <h2 class="font-semibold tracking-wider bg-linear-to-r py-1 pl-2 from-slate-100 to-transparent"><i class="fa-solid fa-gauge"></i> Daftar <span class="bg-green-400 px-1.5 py-1 text-white uppercase rounded">Indikator Sensor</span></h2>
-                <p>Semua indikator ditulis dengan satuan yang umum digunakan dan penjelasan sederhana agar mudah dimengerti oleh pengguna dashboard.</p>
-
-                <table class="indicator-table">
-                    <thead>
-                        <tr>
-                            <th>Indikator</th>
-                            <th>Satuan</th>
-                            <th>Keterangan</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="aquaviska-indicators">
-                        <tr class="indicator-category">
-                            <td colspan="4">AQUA VISKA – Sensor Kualitas Air</td>
-                        </tr>
-                        <tr data-indicator="temperature">
-                            <td>Suhu Air</td>
-                            <td>°C</td>
-                            <td>Temperatur air permukaan yang diukur di lokasi.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="ph">
-                            <td>pH</td>
-                            <td>skala 0–14</td>
-                            <td>Tingkat keasaman atau kebasaan air tanpa satuan.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="turbidity">
-                            <td>Kekeruhan (Turbidity)</td>
-                            <td>NTU</td>
-                            <td>Seberapa keruh air; nilai lebih tinggi berarti air lebih keruh.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="do">
-                            <td>Dissolved Oxygen (DO)</td>
-                            <td>mg/L</td>
-                            <td>Jumlah oksigen terlarut yang tersedia di dalam air.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="tds">
-                            <td>Total Dissolved Solids (TDS)</td>
-                            <td>ppm</td>
-                            <td>Kadar mineral dan zat terlarut dalam air.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr class="indicator-category">
-                            <td colspan="4">IOT CLIMATE – Sensor Kualitas Udara & Iklim</td>
-                        </tr>
-                        <tr data-indicator="air_temp">
-                            <td>Suhu Udara</td>
-                            <td>°C</td>
-                            <td>Temperatur udara di sekitar lokasi sensor.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="humidity">
-                            <td>Kelembapan</td>
-                            <td>% RH</td>
-                            <td>Persentase uap air di udara.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="tvoc">
-                            <td>TVOC</td>
-                            <td>mg/m³</td>
-                            <td>Kadar senyawa organik volatil di udara.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="co2">
-                            <td>CO₂</td>
-                            <td>ppm</td>
-                            <td>Kadar karbon dioksida di udara.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="uv_index">
-                            <td>UV Index</td>
-                            <td>skala</td>
-                            <td>Intensitas sinar ultraviolet yang mencapai permukaan.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="wind_speed">
-                            <td>Kecepatan Angin</td>
-                            <td>m/s</td>
-                            <td>Kecepatan angin di sekitar area sensor.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr data-indicator="rainfall">
-                            <td>Curah Hujan</td>
-                            <td>mm</td>
-                            <td>Jumlah hujan yang tercatat dalam periode tertentu.</td>
-                            <td>
-                                <div class="flex gap-2 justify-center">
-                                    <span class="status-chip good">Normal</span>
-                                    <span class="status-chip medium">Waspada</span>
-                                    <span class="status-chip bad">Bahaya</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Stats Cards -->
+            <div class="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
+                @foreach ($dashboard['summary'] as $index => $stat)
+                    <div
+                        class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white/90 p-3 sm:p-5 shadow-lg shadow-slate-200/70 backdrop-blur-sm">
+                        <div class="flex items-center justify-between gap-2 sm:gap-3">
+                            <p class="text-xs sm:text-sm font-medium text-slate-500">{{ $stat['label'] }}</p>
+                            <span
+                                class="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl {{ $iconBoxClass }}">
+                                <i class="{{ $dashboard['summaryIcons'][$index] }} text-sm sm:text-base"></i>
+                            </span>
+                        </div>
+                        <div class="mt-2 sm:mt-3 flex items-end justify-between gap-3 sm:gap-4">
+                            <div class="text-2xl sm:text-4xl font-bold tracking-tight text-slate-900">{{ $stat['value'] }}
+                            </div>
+                            <span
+                                class="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-slate-600 whitespace-nowrap">Real
+                                time</span>
+                        </div>
+                        @if (isset($stat['note']))
+                            <p class="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-2">{{ $stat['note'] }}</p>
+                        @endif
+                    </div>
+                @endforeach
             </div>
-        </section>
 
+            <div class="mt-6 sm:mt-8 grid gap-5 sm:gap-6 xl:grid-cols-2">
+                <!-- GRAFIK WILAYAH - LINE CHART -->
+                <section id="wilayah"
+                    class="rounded-xl sm:rounded-3xl border  border-slate-200 bg-white/90 p-4 sm:p-6 shadow-xl shadow-slate-200/70 backdrop-blur-sm row">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 border-b border-slate-200 pb-4 sm:pb-5">
+                        <div>
+                            <div
+                                class="inline-flex rounded-full {{ $pillClass }} px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em]">
+                                <i class="{{ $dashboard['icon'] }} mr-1 sm:mr-2"></i>
+                                {{ $dashboard['label'] }} aktif
+                            </div>
+                            <h2 class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-slate-900">Grafik Data Wilayah</h2>
+                            <p class="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-600">Perbandingan kondisi dari beberapa
+                                wilayah dalam bentuk grafik tren.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="setChartRange('week')"
+                                class="chart-range-btn px-2 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">1
+                                Minggu</button>
+                            <button onclick="setChartRange('month')"
+                                class="chart-range-btn px-2 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">1
+                                Bulan</button>
+                            <button onclick="setChartRange('year')"
+                                class="chart-range-btn px-2 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">1
+                                Tahun</button>
+                        </div>
+                    </div>
 
-    </main>
+                    <!-- Canvas untuk Line Chart -->
+                    <div class="chart-container mt-4">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mt-4 pt-3 border-t border-slate-100">
+                        @foreach ($dashboard['regions'] as $index => $region)
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                                <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
+                                    style="background: {{ ['#06b6d4', '#3b82f6', '#8b5cf6', '#10b981'][$index % 4] }}"></span>
+                                <span class="text-[10px] sm:text-xs text-slate-600">{{ $region['name'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+
+                <aside class="space-y-5 sm:space-y-6">
+                    <!-- INFORMASI SENSOR PER WILAYAH - CAROUSEL DENGAN PREVIEW SENSOR DETAIL -->
+                    <section
+                        class="rounded-xl sm:rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-6 shadow-xl shadow-slate-200/70 backdrop-blur-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p
+                                    class="text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] {{ $sectionTitleClass }}">
+                                    <i class="fa-solid fa-chart-line mr-1 sm:mr-2"></i>Data Sensor Wilayah
+                                </p>
+                                <h3 class="mt-1 sm:mt-2 text-lg sm:text-2xl font-bold text-slate-900">Informasi Sensor per
+                                    Wilayah</h3>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-slate-600">
+                                    <i class="fa-regular fa-clock mr-1"></i><span id="slideTimer">8</span> detik
+                                </span>
+                                <button onclick="toggleCarousel()"
+                                    class="rounded-full border border-slate-200 bg-white p-1.5 sm:p-2 hover:bg-slate-50 transition">
+                                    <i id="playPauseIcon" class="fa-solid fa-pause text-slate-600 text-xs sm:text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 sm:mt-5 relative min-h-[450px]">
+                            @foreach ($dashboard['sensorSlides'] ?? [] as $index => $slide)
+                                <div class="sensor-slide absolute inset-0 rounded-xl sm:rounded-2xl border border-slate-200 bg-gradient-to-br {{ $slide['bgClass'] ?? 'from-white to-slate-50' }} p-4 sm:p-5 transition-all duration-500 shadow-sm"
+                                    data-slide-index="{{ $index }}"
+                                    @if ($index !== 0) style="opacity: 0; transform: translateX(18px); pointer-events: none;"
+                                    @else style="opacity: 1; transform: translateX(0);" @endif>
+
+                                    <!-- Header Wilayah -->
+                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl {{ $slide['badgeClass'] }} flex items-center justify-center">
+                                                <i class="{{ $slide['icon'] }} text-base sm:text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-base sm:text-lg font-bold text-slate-900">
+                                                    {{ $slide['title'] }}</h4>
+                                                <p class="text-[10px] sm:text-xs text-slate-500">{{ $slide['subtitle'] }}
+                                                </p>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                    <span
+                                                        class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-slate-400">
+                                                        <i class="fa-solid fa-location-dot"></i>
+                                                        {{ $slide['location'] ?? 'Indonesia' }}
+                                                    </span>
+                                                    <span
+                                                        class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-slate-400">
+                                                        <i class="fa-solid fa-microchip"></i> {{ $slide['deviceCount'] }}
+                                                        devices
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="flex items-center gap-1">
+                                                <span
+                                                    class="text-2xl sm:text-3xl font-bold {{ $slide['scoreColor'] }}">{{ $slide['score'] }}</span>
+                                                <span class="text-[10px] sm:text-xs text-slate-400">/100</span>
+                                            </div>
+                                            <div class="text-[8px] sm:text-[10px] text-slate-400 mt-1">Health Score</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Data Sensor Grid - Preview Sensor Detail -->
+                                    <div class="mt-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-[10px] sm:text-xs font-semibold text-slate-600">
+                                                <i class="fa-solid fa-waveform mr-1"></i>Parameter Sensor Real-time
+                                            </span>
+                                            <span class="text-[8px] sm:text-[10px] text-slate-400">Nilai & Status</span>
+                                        </div>
+
+                                        <!-- Grid Sensor dengan Status -->
+                                        <div class="grid grid-cols-2 gap-2 sm:gap-3 sensor-grid">
+                                            @foreach ($slide['sensors'] as $sensor)
+                                                <div
+                                                    class="sensor-preview-card bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 border border-slate-100 shadow-sm">
+                                                    <div class="flex items-center justify-between mb-1.5">
+                                                        <div class="flex items-center gap-1.5">
+                                                            <i
+                                                                class="fas {{ $sensor['icon'] ?? 'fa-microchip' }} text-[10px] sm:text-sm {{ $sensor['iconColor'] ?? 'text-slate-500' }}"></i>
+                                                            <span
+                                                                class="text-[9px] sm:text-xs font-medium text-slate-600">{{ $sensor['label'] }}</span>
+                                                        </div>
+                                                        <span
+                                                            class="text-xs sm:text-sm font-bold text-slate-800">{{ $sensor['value'] }}
+                                                            {{ $sensor['unit'] ?? '' }}</span>
+                                                    </div>
+                                                    <div class="relative mb-1.5">
+                                                        <div class="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                                                            <div class="sensor-progress-bar h-full rounded-full {{ $sensor['barColor'] ?? 'bg-slate-400' }}"
+                                                                style="width: {{ $sensor['percentage'] ?? 0 }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="text-[7px] sm:text-[9px] text-slate-400">Normal
+                                                            range</span>
+                                                        <span
+                                                            class="text-[7px] sm:text-[9px] font-medium {{ $sensor['percentage'] >= 70 ? 'text-emerald-600' : ($sensor['percentage'] >= 50 ? 'text-amber-600' : 'text-red-600') }}">
+                                                            <i
+                                                                class="fa-solid {{ $sensor['percentage'] >= 70 ? 'fa-circle-check' : ($sensor['percentage'] >= 50 ? 'fa-triangle-exclamation' : 'fa-circle-exclamation') }} mr-0.5"></i>
+                                                            {{ $sensor['status'] ?? ($sensor['percentage'] >= 70 ? 'Baik' : ($sensor['percentage'] >= 50 ? 'Waspada' : 'Kritis')) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional Info Footer -->
+                                    <div
+                                        class="mt-3 pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[8px] sm:text-[10px] text-slate-400">
+                                        <span><i class="fa-regular fa-clock mr-1"></i>Last update:
+                                            {{ $slide['lastUpdate'] }}</span>
+                                        <span><i class="fa-solid fa-chart-line mr-1"></i>Live monitoring aktif</span>
+                                        <span><i class="fa-solid fa-sync-alt mr-1"></i>Real-time</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Dots Navigation -->
+                        <div class="mt-4 flex items-center justify-center gap-1.5 sm:gap-2" id="slide-dots">
+                            @foreach ($dashboard['sensorSlides'] ?? [] as $index => $slide)
+                                <button type="button"
+                                    class="slide-dot h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-slate-300 transition-all duration-300"
+                                    data-dot-index="{{ $index }}"
+                                    aria-label="Slide {{ $index + 1 }}"></button>
+                            @endforeach
+                        </div>
+                    </section>
+                </aside>
+            </div>
+
+            <!-- Navigation Footer -->
+            <section
+                class="mt-6 sm:mt-8 rounded-xl sm:rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-6 shadow-xl shadow-slate-200/70 backdrop-blur-sm">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="text-center md:text-left">
+                        <p class="text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] {{ $sectionTitleClass }}">
+                            <i class="fa-solid fa-compass mr-1 sm:mr-2"></i>Fokus halaman
+                        </p>
+                        <h3 class="mt-1 sm:mt-2 text-lg sm:text-2xl font-bold text-slate-900">Buka Menu Perangkat</h3>
+                        <p class="mt-1 sm:mt-2 max-w-3xl text-xs sm:text-sm leading-5 sm:leading-6 text-slate-600">
+                            Dashboard ini mengikuti menu yang sedang dibuka. Pilih perangkat untuk melihat detail
+                            monitoring.
+                        </p>
+                    </div>
+                    <a href="/modul/devices/{{ $activeModule }}"
+                        class="w-1/2 h-full px-4 py-10 {{ $dashboard['label'] === 'AquaViska' ? 'bg-sky-400/20 hover:bg-sky-400/50' : 'bg-orange-400/20 hover:bg-orange-400/50' }}  font-semibold rounded-3xl flex items-center justify-center transition-all duration-300 hover:-translate-y-2">
+                        <div
+                            class=" flex items-center justify-center text-white font-semibold tracking-wider text-5xl rounded-3xl">
+                            <i class="fa-solid fa-microchip mr-4"></i>
+                            @if ($dashboard['label'] === 'Climeet')
+                                <i class="fa-solid fa-cloud-sun mr-4"></i>
+                            @else
+                                <i class="fa-solid fa-water mr-4"></i>
+                            @endif
+                            <i class="fa-solid fa-location-arrow mr-4"></i>
+                            <i class="fa-solid fa-shield-halved mr-4"></i>
+                            <span class="uppercase">{{ $dashboard['label'] }}</span>
+                        </div>
+
+                    </a>
+                </div>
+            </section>
+        </div>
+    </div>
+@endsection
+
+@section('script')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        let carouselInterval;
+        let currentIndex = 0;
+        let isPlaying = true;
+        let currentTimerSeconds = 8;
+        let timerInterval;
+        let regionChart;
+
+        // Data untuk chart wilayah dari controller
+        const chartLabels = @json($dashboard['chartLabels'] ?? []);
+        const chartDatasets = @json($dashboard['chartDatasets'] ?? []);
+
+        // Inisialisasi Line Chart
+        function initRegionChart() {
+            const ctx = document.getElementById('regionChart').getContext('2d');
+
+            regionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: chartDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 10,
+                                usePointStyle: true,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#e2e8f0',
+                            padding: 8,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 105,
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Skor Kondisi (%)',
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            ticks: {
+                                stepSize: 20,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Periode',
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.3,
+                            borderWidth: 2
+                        },
+                        point: {
+                            radius: 3,
+                            hoverRadius: 5,
+                            hitRadius: 10
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10,
+                            left: 5,
+                            right: 5
+                        }
+                    }
+                }
+            });
+        }
+
+        function setChartRange(range) {
+            const btn = event.target;
+            document.querySelectorAll('.chart-range-btn').forEach(btn => {
+                btn.classList.remove('bg-{{ $isAqua ? 'cyan' : 'orange' }}-100',
+                    'border-{{ $isAqua ? 'cyan' : 'orange' }}-300');
+                btn.classList.add('bg-white');
+            });
+            btn.classList.add('bg-{{ $isAqua ? 'cyan' : 'orange' }}-100', 'border-{{ $isAqua ? 'cyan' : 'orange' }}-300');
+
+            // Update chart berdasarkan range
+            if (range === 'week') {
+                regionChart.data.labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+            } else if (range === 'month') {
+                regionChart.data.labels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'];
+            } else {
+                regionChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov',
+                    'Des'
+                ];
+            }
+            regionChart.update();
+        }
+
+        // Carousel Functions
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.sensor-slide');
+            const dots = document.querySelectorAll('.slide-dot');
+
+            if (!slides.length) return;
+
+            slides.forEach((slide, slideIndex) => {
+                const active = slideIndex === index;
+                slide.style.opacity = active ? '1' : '0';
+                slide.style.transform = active ? 'translateX(0)' : 'translateX(18px)';
+                slide.style.pointerEvents = active ? 'auto' : 'none';
+            });
+
+            dots.forEach((dot, dotIndex) => {
+                if (dotIndex === index) {
+                    dot.classList.add('bg-slate-700', 'scale-150');
+                    dot.classList.remove('bg-slate-300');
+                } else {
+                    dot.classList.remove('bg-slate-700', 'scale-150');
+                    dot.classList.add('bg-slate-300');
+                }
+            });
+        }
+
+        function nextSlide() {
+            const slides = document.querySelectorAll('.sensor-slide');
+            if (!slides.length) return;
+            currentIndex = (currentIndex + 1) % slides.length;
+            showSlide(currentIndex);
+            resetTimer();
+        }
+
+        function startCarousel() {
+            if (carouselInterval) clearInterval(carouselInterval);
+            carouselInterval = setInterval(() => {
+                if (isPlaying) nextSlide();
+            }, 8000);
+        }
+
+        function stopCarousel() {
+            if (carouselInterval) clearInterval(carouselInterval);
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        function toggleCarousel() {
+            isPlaying = !isPlaying;
+            const icon = document.getElementById('playPauseIcon');
+            const timerSpan = document.getElementById('slideTimer');
+
+            if (isPlaying) {
+                icon.className = 'fa-solid fa-pause text-slate-600 text-xs sm:text-sm';
+                timerSpan.style.opacity = '1';
+                startCarousel();
+                startTimerDisplay();
+            } else {
+                icon.className = 'fa-solid fa-play text-slate-600 text-xs sm:text-sm';
+                timerSpan.style.opacity = '0.5';
+                stopCarousel();
+            }
+        }
+
+        function startTimerDisplay() {
+            if (timerInterval) clearInterval(timerInterval);
+            currentTimerSeconds = 8;
+            const timerSpan = document.getElementById('slideTimer');
+            timerInterval = setInterval(() => {
+                if (isPlaying) {
+                    currentTimerSeconds--;
+                    if (timerSpan) timerSpan.textContent = currentTimerSeconds;
+                    if (currentTimerSeconds <= 0) currentTimerSeconds = 8;
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            if (!isPlaying) return;
+            currentTimerSeconds = 8;
+            const timerSpan = document.getElementById('slideTimer');
+            if (timerSpan) timerSpan.textContent = currentTimerSeconds;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initRegionChart();
+
+            const slides = Array.from(document.querySelectorAll('.sensor-slide'));
+            const dots = Array.from(document.querySelectorAll('.slide-dot'));
+
+            if (slides.length) {
+                dots.forEach((dot, idx) => {
+                    dot.addEventListener('click', () => {
+                        currentIndex = idx;
+                        showSlide(currentIndex);
+                        if (isPlaying) resetTimer();
+                    });
+                });
+                showSlide(0);
+                startCarousel();
+                startTimerDisplay();
+            }
+        });
+    </script>
 @endsection

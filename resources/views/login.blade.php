@@ -41,7 +41,7 @@
             </div>
             <div class="max-w-md w-full relative">
                 <div class="">
-                    <a href="{{ route('home.modul') }}"
+                    <a href="{{ route('home') }}"
                         class="flex items-center gap-2 opacity-40 hover:opacity-100 group absolute -top-6 left-0 text-sm text-gray-600 hover:text-gray-800 transition">
                         <i
                             class="fa-solid fa-arrow-left text-lg group-hover:-translate-x-1.5 transition-all duration-500"></i>
