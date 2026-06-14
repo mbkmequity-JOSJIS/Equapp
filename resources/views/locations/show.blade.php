@@ -646,7 +646,7 @@
         <div class="main-content">
             <div class="page-header">
                 <div class="breadcrumb">
-                    <a href="{{ route('lokasi') }}"><i class="fas fa-arrow-left"></i> Kembali ke Lokasi</a>
+                    <a href="{{ route('locations') }}"><i class="fas fa-arrow-left"></i> Kembali ke Lokasi</a>
                     <span class="bc-sep">/</span>
                     <span>{{ $location['name'] }}</span>
                 </div>

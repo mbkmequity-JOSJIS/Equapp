@@ -4,6 +4,7 @@
 use App\Http\Controllers\Api\BmkgProxyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\DeviceController;
 use Illuminate\Support\Facades\Route;
 use Kreait\Firebase\Factory;
 
@@ -24,12 +25,18 @@ Route::get('/', function () {
     return view('index');
 })->name('welcome');
 
-Route::get('/modul/', [DashboardController::class, 'index'])->name('home');
 
-Route::get('/modul/lokasi', [LocationController::class, 'index'])->name('lokasi');
-Route::get('/modul/perangkat', [LocationController::class, 'index'])->name('perangkat');
-Route::get('/modul/lokasi/{id}', [LocationController::class, 'show'])->name('location.detail');
-Route::get('/modul/api/sensor-data', [LocationController::class, 'getSensorData'])->name('api.sensor.data');
-Route::get('/modul/api/location/{id}', [LocationController::class, 'getLocationDetail'])->name('api.location.detail');
 
+Route::middleware(['guest'])->group(function () {
+    Route::get('/modul/devices', [DeviceController::class, 'index'])->name('devices');
+    Route::get('/modul/devices/{device}', [DeviceController::class, 'devices'])->name('device.list');
+    Route::get('/modul/devices/{device}/{id}', [DeviceController::class, 'show'])->name('device.detail');
+    Route::get('/modul/api/devices/{device}/{id}', [DeviceController::class, 'getDetail'])->name('api.device.detail');
+    Route::get('/modul/locations', [LocationController::class, 'index'])->name('locations');
+    Route::get('/modul/locations/{id}', [LocationController::class, 'show'])->name('location.detail');
+    Route::get('/modul/api/sensor-data', [LocationController::class, 'getSensorData'])->name('api.sensor.data');
+    Route::get('/modul/api/location/{id}', [LocationController::class, 'getLocationDetail'])->name('api.location.detail');
+    Route::get('/modul/{module}', [DashboardController::class, 'index'])->name('module');
+    Route::get('/modul/', [DashboardController::class, 'index'])->name('home');
+});
 Route::get('/modul/api/bmkg/forecast', BmkgProxyController::class)->name('api.bmkg.forecast');

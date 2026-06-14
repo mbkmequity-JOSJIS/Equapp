@@ -53,8 +53,12 @@
                         <li><a href="#indikator" class="">Indikator</a></li>
                         <span class="text-sm bg-slate-50/20 px-2 py-1.5 text-white mt-1.5">IOT Module Feature</span>
                         <hr class="p-0 m-0 mt-2 border-slate-100/40">
-                        <li><a href="{{ route('lokasi') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-location-arrow"></i> Lokasi</a></li>
-                        <li><a href="{{ route('perangkat') }}" class="text-xl flex items-center gap-4"> <i class="fa-solid fa-microchip"></i> Perangkat</a></li>
+                        <li><a href="/modul/climeet" class="text-xl flex items-center gap-4 hover:text-orange-300"> <i class="fa-solid fa-cloud-sun"></i></i>CLIMEET<span class="text-lg text-slate-200">Monitoring</span></a></li>
+                        <li><a href="/modul/aquaviska" class="text-xl flex items-center gap-4 hover:text-sky-800"> <i class="fa-solid fa-water"></i></i>AQUAVISKA<span class="text-lg text-slate-200">Monitoring</span></a></li>
+                        <div class="flex gap-5 mt-4 text-white [&>li]:hover:text-sky-400 [&>li]:hover:text-shadow-slate-600  px-1 py-1.5 rounded-3xl [&>li]:hover:translate-x-1 [&>li]:hover:-translate-y-3 [&>li]:translate-y-1  [&>li]:transition-all [&>li]:duration-500">
+                            <li class="relative"><a href="{{ route('devices') }}" class="text-3xl pl-7 flex items-center gap-4 group/climeet"> <i class="fa-solid fa-location-arrow"></i> <span class="text-xs absolute hidden delay-[5000] group-hover/climeet:block translate-x-1 translate-8 bg-white/80 text-slate-600 p-1 rounded-md">Lokasi</span></a></li>
+                            <li  class="relative"><a href="{{ route('devices') }}" class="text-3xl pl-7 flex items-center gap-4 group/aquaviska"> <i class="fa-solid fa-microchip"></i> <span class="text-xs absolute hidden delay-[5000] group-hover/aquaviska:block translate-x-1 translate-8 bg-white/80 text-slate-600 p-1 rounded-md">Perangkat</span></a></li>
+                        </div>
                     </ul>
                 @endif
             </div>
