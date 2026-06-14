@@ -69,6 +69,34 @@ class DeviceController extends Controller
             ->header('Pragma', 'no-cache');
     }
 
+    public function storeCalibration(Request $request, $device, $device_code): JsonResponse
+    {
+        $calibrationData = $request->validate([
+            'sensor_label' => 'required|string|max:120',
+            'sensor_type' => 'required|string|max:50',
+            'current_value' => 'nullable|string|max:100',
+            'reference_value' => 'required|numeric',
+            'offset_value' => 'nullable|numeric',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $this->firebaseService->setCalibration($device, $device_code, [
+                'sensor_type' => $calibrationData['sensor_type'],
+                'current_value' => $calibrationData['current_value'] ?? null,
+                'reference_value' => (float) $calibrationData['reference_value'],
+                'offset_value' => isset($calibrationData['offset_value']) ? (float) $calibrationData['offset_value'] : null,
+                'notes' => $calibrationData['notes'] ?? null,
+            ]);
+
+            return response()->json([
+                'message' => 'Data kalibrasi berhasil dikirim ke Firebase.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update calibration data', 'details' => $e->getMessage()], 500);
+        }
+    }
+
     private function resolveDeviceDetail($device, $device_code): array
     {
         if ($device == 'aquaviska') {

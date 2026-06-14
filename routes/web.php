@@ -32,6 +32,7 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/modul/devices/{device}', [DeviceController::class, 'devices'])->name('device.list');
     Route::get('/modul/devices/{device}/{id}', [DeviceController::class, 'show'])->name('device.detail');
     Route::get('/modul/api/devices/{device}/{id}', [DeviceController::class, 'getDetail'])->name('api.device.detail');
+    Route::post('/modul/api/devices/{device}/{id}/calibration', [DeviceController::class, 'storeCalibration'])->name('api.device.calibration.store');
     Route::get('/modul/locations', [LocationController::class, 'index'])->name('locations');
     Route::get('/modul/locations/{id}', [LocationController::class, 'show'])->name('location.detail');
     Route::get('/modul/api/sensor-data', [LocationController::class, 'getSensorData'])->name('api.sensor.data');

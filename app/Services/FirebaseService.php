@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Kreait\Firebase\Contract\Database;
+use Illuminate\Support\Facades\Log;
 
 class FirebaseService
 {
@@ -16,6 +17,7 @@ class FirebaseService
             ->createDatabase();
     }
 
+    // Fungsi untuk mendapatkan data mentah dari Firebase berdasarkan jenis device
     public function getRawDataMonitoring($device): array
     {
 
@@ -33,7 +35,7 @@ class FirebaseService
             return $data ?? [];
         } catch (\Exception $e) {
             // Log error jika terjadi masalah saat mengambil data
-            \Log::error('FirebaseService Error: ' . $e->getMessage());
+            Log::error('FirebaseService Error: ' . $e->getMessage());
             return [];
         }
     }
@@ -69,9 +71,31 @@ class FirebaseService
             $dataDevices = $data['Device'] ?? [];
             return $dataDevices;
         } catch (\Exception $e) {
-            \Log::error("FirebaseService Error fetching data for device '{$device}': " . $e->getMessage());
+            Log::error("FirebaseService Error fetching data for device '{$device}': " . $e->getMessage());
             return [];
         }
+    }
+
+    public function setCalibration(string $device, string $deviceCode, array $data)
+    {
+        $path = match ($device) {
+            'aquaviska' => 'water_quality',
+            'climeet' => 'weather_station',
+            default => null,
+        };
+
+        if (! $path) {
+            throw new \InvalidArgumentException('Invalid device type.');
+        }
+
+        $payload = array_diff($data, [
+            'device_code' => $deviceCode,
+            'updated_at' => now()->toDateTimeString(),
+        ]);
+
+        return $this->database
+            ->getReference("{$path}/{$deviceCode}/Calibration/{$data['sensor_type']}")
+            ->set($payload);
     }
 
     // public function getDataClimeet()

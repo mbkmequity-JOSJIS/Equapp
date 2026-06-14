@@ -47,12 +47,12 @@
         .modal-transition {
             transition: opacity 0.2s ease, visibility 0.2s ease;
         }
-        
+
         .modal-transition.hidden {
             opacity: 0;
             visibility: hidden;
         }
-        
+
         .modal-transition:not(.hidden) {
             opacity: 1;
             visibility: visible;
@@ -318,200 +318,51 @@
         </div>
     </div>
 
-    <!-- MODAL KALIBRASI SENSOR -->
-    <div id="calibrationModal" 
-         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal-transition"
-         onclick="if(event.target === this) closeCalibrationModal()">
-        <div class="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-800 to-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
-                        <i id="modalSensorIcon" class="fas fa-microchip text-sky-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 id="modalTitle" class="text-lg font-bold text-white">Kalibrasi Sensor</h3>
-                        <p id="modalSensorLabel" class="text-xs text-slate-300">-</p>
-                    </div>
+    <div id="calibrationModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm modal-transition" onclick="if(event.target === this) closeCalibrationModal()">
+        <div class="relative mx-4 w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-200 bg-slate-900 px-6 py-4">
+                <div>
+                    <h3 id="modalTitle" class="text-lg font-bold text-white">Kalibrasi Sensor</h3>
+                    <p id="modalSensorLabel" class="text-xs text-slate-300">-</p>
                 </div>
-                <button onclick="closeCalibrationModal()" 
-                        class="text-slate-400 hover:text-white transition-colors">
+                <button onclick="closeCalibrationModal()" class="text-slate-400 transition-colors hover:text-white">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
 
-            <!-- Modal Body - Form Kalibrasi -->
-            <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
-                <form id="calibrationForm" onsubmit="saveCalibration(event)">
-                    <input type="hidden" id="sensorType" name="sensor_type">
-                    <input type="hidden" id="currentValue" name="current_value">
-                    
-                    <!-- pH Sensor Form -->
-                    <div id="formPh" class="sensor-form hidden">
-                        <div class="bg-sky-50 rounded-xl p-4 mb-4">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Referensi</label>
-                                    <input type="number" step="0.01" id="phReference" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
-                                           placeholder="Contoh: 7.00">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Terbaca Sensor</label>
-                                    <input type="number" step="0.01" id="phReading" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
-                                           placeholder="Nilai saat ini dari sensor">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Offset (readonly)</label>
-                                    <input type="text" id="phOffset" readonly 
-                                           class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
-                                           placeholder="Akan terhitung otomatis">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <form id="calibrationForm" class="space-y-4 px-6 py-5" onsubmit="saveCalibration(event)">
+                @csrf
+                <input type="hidden" id="sensorType" name="sensor_type">
+                <input type="hidden" id="currentValue" name="current_value">
 
-                    <!-- TDS Sensor Form -->
-                    <div id="formTds" class="sensor-form hidden">
-                        <div class="bg-emerald-50 rounded-xl p-4 mb-4">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Referensi (ppm)</label>
-                                    <input type="number" step="1" id="tdsReference" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
-                                           placeholder="Contoh: 500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Terbaca Sensor (ppm)</label>
-                                    <input type="number" step="1" id="tdsReading" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
-                                           placeholder="Nilai saat ini dari sensor">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Calibration Factor (readonly)</label>
-                                    <input type="text" id="tdsFactor" readonly 
-                                           class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
-                                           placeholder="Akan terhitung otomatis">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700">Referensi Kalibrasi</label>
+                    <input type="number" step="any" id="referenceValue" name="reference_value" class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100" placeholder="Masukkan nilai referensi" required>
+                </div>
 
-                    <!-- DO Sensor Form -->
-                    <div id="formDo" class="sensor-form hidden">
-                        <div class="bg-blue-50 rounded-xl p-4 mb-4">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Referensi (mg/L)</label>
-                                    <input type="number" step="0.1" id="doReference" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                                           placeholder="Contoh: 8.0">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Terbaca Sensor (mg/L)</label>
-                                    <input type="number" step="0.1" id="doReading" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                                           placeholder="Nilai saat ini dari sensor">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Calibration Factor (readonly)</label>
-                                    <input type="text" id="doFactor" readonly 
-                                           class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
-                                           placeholder="Akan terhitung otomatis">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700">Nilai Offset / Koreksi</label>
+                    <input type="number" step="any" id="offsetValue" name="offset_value" class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100" placeholder="Opsional">
+                </div>
 
-                    <!-- Temperature Sensor Form -->
-                    <div id="formTemp" class="sensor-form hidden">
-                        <div class="bg-orange-50 rounded-xl p-4 mb-4">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Referensi (°C)</label>
-                                    <input type="number" step="0.1" id="tempReference" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                                           placeholder="Contoh: 25.0">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Terbaca Sensor (°C)</label>
-                                    <input type="number" step="0.1" id="tempReading" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-                                           placeholder="Nilai saat ini dari sensor">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Offset (readonly)</label>
-                                    <input type="text" id="tempOffset" readonly 
-                                           class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500"
-                                           placeholder="Akan terhitung otomatis">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700">Catatan</label>
+                    <textarea id="calibrationNotes" name="notes" rows="3" class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100" placeholder="Opsional"></textarea>
+                </div>
 
-                    <!-- Turbidity Sensor Form -->
-                    <div id="formTurbidity" class="sensor-form hidden">
-                        <div class="bg-amber-50 rounded-xl p-4 mb-4">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">ADC Air Bersih</label>
-                                    <input type="number" id="turbidityClean" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
-                                           placeholder="Nilai ADC pada air bersih">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">ADC Air Keruh</label>
-                                    <input type="number" id="turbidityDirty" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
-                                           placeholder="Nilai ADC pada air keruh">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Default/Unknown Sensor Form -->
-                    <div id="formDefault" class="sensor-form hidden">
-                        <div class="bg-slate-50 rounded-xl p-4 mb-4">
-                            <div class="flex items-center gap-2 mb-3">
-                                <i class="fas fa-microchip text-slate-600"></i>
-                                <h4 class="font-semibold text-slate-800">Kalibrasi Sensor</h4>
-                            </div>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Referensi</label>
-                                    <input type="number" step="any" id="defaultReference" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-400"
-                                           placeholder="Masukkan nilai referensi">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nilai Terbaca Sensor</label>
-                                    <input type="number" step="any" id="defaultReading" 
-                                           class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-400"
-                                           placeholder="Nilai saat ini dari sensor">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50">
-                <button onclick="closeCalibrationModal()" 
-                        class="px-5 py-2.5 border border-slate-300 rounded-xl text-slate-600 font-medium hover:bg-slate-100 transition">
-                    Batal
-                </button>
-                <button onclick="saveCalibration()" 
-                        class="px-5 py-2.5 b bg-sky-500 cursor-pointer text-white rounded-xl font-medium hover:from-sky-600 hover:to-blue-700 transition shadow-md">
-                    <i class="fas fa-save mr-2"></i>
-                    Simpan Kalibrasi
-                </button>
-            </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 pt-4">
+                    <button type="button" onclick="closeCalibrationModal()" class="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Batal</button>
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600">
+                        <i class="fas fa-save"></i>
+                        Simpan ke Firebase
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
 @endsection
 
 @section('script')
@@ -612,9 +463,26 @@
             setInterval(refresh, pollInterval);
         })();
 
-        // ========== MODAL KALIBRASI SENSOR ==========
-        
-        // Fungsi untuk menentukan jenis sensor berdasarkan label
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        function showToast(icon, title, text) {
+            if (!window.Swal) {
+                alert(text || title);
+                return;
+            }
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                icon,
+                title,
+                text,
+            });
+        }
+
         function getSensorType(label) {
             const lowerLabel = label.toLowerCase();
             if (lowerLabel.includes('ph')) return 'ph';
@@ -625,248 +493,66 @@
             return 'default';
         }
 
-        // Fungsi untuk mendapatkan icon berdasarkan jenis sensor
-        function getSensorIcon(type) {
-            const icons = {
-                ph: 'fa-flask',
-                tds: 'fa-tint',
-                do: 'fa-wind',
-                temp: 'fa-thermometer-half',
-                turbidity: 'fa-eye',
-                default: 'fa-microchip'
-            };
-            return icons[type] || icons.default;
-        }
-
-        // Fungsi untuk mendapatkan warna berdasarkan jenis sensor
-        function getSensorColor(type) {
-            const colors = {
-                ph: 'sky',
-                tds: 'emerald',
-                do: 'blue',
-                temp: 'orange',
-                turbidity: 'amber',
-                default: 'slate'
-            };
-            return colors[type] || colors.default;
-        }
-
-        // Fungsi untuk menghitung offset
-        function calculateOffset(reference, reading) {
-            if (reference === '' || reading === '') return '';
-            const offset = parseFloat(reading) - parseFloat(reference);
-            return offset.toFixed(2);
-        }
-
-        // Fungsi untuk menghitung calibration factor
-        function calculateFactor(reference, reading) {
-            if (reference === '' || reading === '' || parseFloat(reading) === 0) return '';
-            const factor = parseFloat(reference) / parseFloat(reading);
-            return factor.toFixed(4);
-        }
-
-        // Event listener untuk auto-calculate pada form pH
-        function setupAutoCalculate() {
-            // pH Offset
-            const phRef = document.getElementById('phReference');
-            const phRead = document.getElementById('phReading');
-            const phOffset = document.getElementById('phOffset');
-            if (phRef && phRead && phOffset) {
-                const updatePhOffset = () => {
-                    phOffset.value = calculateOffset(phRef.value, phRead.value);
-                };
-                phRef.addEventListener('input', updatePhOffset);
-                phRead.addEventListener('input', updatePhOffset);
-            }
-
-            // TDS Factor
-            const tdsRef = document.getElementById('tdsReference');
-            const tdsRead = document.getElementById('tdsReading');
-            const tdsFactor = document.getElementById('tdsFactor');
-            if (tdsRef && tdsRead && tdsFactor) {
-                const updateTdsFactor = () => {
-                    tdsFactor.value = calculateFactor(tdsRef.value, tdsRead.value);
-                };
-                tdsRef.addEventListener('input', updateTdsFactor);
-                tdsRead.addEventListener('input', updateTdsFactor);
-            }
-
-            // DO Factor
-            const doRef = document.getElementById('doReference');
-            const doRead = document.getElementById('doReading');
-            const doFactor = document.getElementById('doFactor');
-            if (doRef && doRead && doFactor) {
-                const updateDoFactor = () => {
-                    doFactor.value = calculateFactor(doRef.value, doRead.value);
-                };
-                doRef.addEventListener('input', updateDoFactor);
-                doRead.addEventListener('input', updateDoFactor);
-            }
-
-            // Temperature Offset
-            const tempRef = document.getElementById('tempReference');
-            const tempRead = document.getElementById('tempReading');
-            const tempOffset = document.getElementById('tempOffset');
-            if (tempRef && tempRead && tempOffset) {
-                const updateTempOffset = () => {
-                    tempOffset.value = calculateOffset(tempRef.value, tempRead.value);
-                };
-                tempRef.addEventListener('input', updateTempOffset);
-                tempRead.addEventListener('input', updateTempOffset);
-            }
-        }
-
-        // Fungsi untuk membuka modal kalibrasi
-        window.openCalibrationModal = function(sensorLabel, currentValue) {
+        window.openCalibrationModal = function(sensorLabel, currentValue, unit = '') {
             const modal = document.getElementById('calibrationModal');
-            const sensorType = getSensorType(sensorLabel);
-            const sensorColor = getSensorColor(sensorType);
-            
-            // Update header modal
             document.getElementById('modalTitle').innerHTML = `Kalibrasi ${sensorLabel}`;
-            document.getElementById('modalSensorLabel').innerHTML = `Sensor ${sensorLabel} | Nilai saat ini: ${currentValue}`;
-            document.getElementById('modalSensorIcon').innerHTML = `<i class="fas ${getSensorIcon(sensorType)} text-${sensorColor}-400 text-xl"></i>`;
-            document.getElementById('sensorType').value = sensorType;
+            document.getElementById('modalSensorLabel').innerHTML = `Sensor ${sensorLabel} | Nilai saat ini: ${currentValue} ${unit || ''}`;
+            document.getElementById('sensorType').value = getSensorType(sensorLabel);
             document.getElementById('currentValue').value = currentValue;
-            
-            // Sembunyikan semua form terlebih dahulu
-            document.querySelectorAll('.sensor-form').forEach(form => {
-                form.classList.add('hidden');
-            });
-            
-            // Tampilkan form yang sesuai
-            let formId = '';
-            switch(sensorType) {
-                case 'ph':
-                    formId = 'formPh';
-                    break;
-                case 'tds':
-                    formId = 'formTds';
-                    break;
-                case 'do':
-                    formId = 'formDo';
-                    break;
-                case 'temp':
-                    formId = 'formTemp';
-                    break;
-                case 'turbidity':
-                    formId = 'formTurbidity';
-                    break;
-                default:
-                    formId = 'formDefault';
-            }
-            
-            const selectedForm = document.getElementById(formId);
-            if (selectedForm) {
-                selectedForm.classList.remove('hidden');
-            }
-            
-            // Reset semua input
-            document.querySelectorAll('#calibrationForm input').forEach(input => {
-                if (input.type !== 'hidden') {
-                    input.value = '';
-                }
-            });
-            
-            // Set nilai terbaca sensor dengan nilai current jika ada
-            const readingInputs = ['phReading', 'tdsReading', 'doReading', 'tempReading'];
-            readingInputs.forEach(id => {
-                const input = document.getElementById(id);
-                if (input && currentValue) {
-                    input.value = currentValue;
-                    // Trigger event untuk update perhitungan
-                    input.dispatchEvent(new Event('input'));
-                }
-            });
-            
-            // Tampilkan modal
+            document.getElementById('referenceValue').value = currentValue || '';
+            document.getElementById('offsetValue').value = '';
+            document.getElementById('calibrationNotes').value = '';
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             document.body.style.overflow = 'hidden';
-            
-            // Setup auto-calculate setelah modal terbuka
-            setTimeout(setupAutoCalculate, 100);
         };
-        
-        // Fungsi untuk menutup modal
+
         window.closeCalibrationModal = function() {
             const modal = document.getElementById('calibrationModal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             document.body.style.overflow = '';
         };
-        
-        // Fungsi untuk menyimpan kalibrasi
-        window.saveCalibration = function(event) {
+
+        window.saveCalibration = async function(event) {
             if (event) event.preventDefault();
-            
-            const sensorType = document.getElementById('sensorType').value;
-            const sensorLabel = document.getElementById('modalSensorLabel').innerHTML.split('|')[0].replace('Sensor ', '').trim();
-            const currentValue = document.getElementById('currentValue').value;
-            
-            let calibrationData = {
-                sensor_label: sensorLabel,
-                sensor_type: sensorType,
-                current_value: currentValue,
-                timestamp: new Date().toISOString()
-            };
-            
-            // Ambil data berdasarkan jenis sensor
-            switch(sensorType) {
-                case 'ph':
-                    calibrationData.reference_value = document.getElementById('phReference').value;
-                    calibrationData.sensor_reading = document.getElementById('phReading').value;
-                    calibrationData.offset = document.getElementById('phOffset').value;
-                    break;
-                case 'tds':
-                    calibrationData.reference_value = document.getElementById('tdsReference').value;
-                    calibrationData.sensor_reading = document.getElementById('tdsReading').value;
-                    calibrationData.calibration_factor = document.getElementById('tdsFactor').value;
-                    break;
-                case 'do':
-                    calibrationData.reference_value = document.getElementById('doReference').value;
-                    calibrationData.sensor_reading = document.getElementById('doReading').value;
-                    calibrationData.calibration_factor = document.getElementById('doFactor').value;
-                    break;
-                case 'temp':
-                    calibrationData.reference_value = document.getElementById('tempReference').value;
-                    calibrationData.sensor_reading = document.getElementById('tempReading').value;
-                    calibrationData.offset = document.getElementById('tempOffset').value;
-                    break;
-                case 'turbidity':
-                    calibrationData.clean_water_adc = document.getElementById('turbidityClean').value;
-                    calibrationData.dirty_water_adc = document.getElementById('turbidityDirty').value;
-                    break;
-                default:
-                    calibrationData.reference_value = document.getElementById('defaultReference').value;
-                    calibrationData.sensor_reading = document.getElementById('defaultReading').value;
-            }
-            
-            // Validasi sederhana
-            if (sensorType === 'turbidity') {
-                if (!calibrationData.clean_water_adc && !calibrationData.dirty_water_adc) {
-                    alert('Mohon isi minimal salah satu nilai ADC!');
-                    return;
+
+            const root = document.querySelector('[data-device-api]');
+            const deviceCode = root?.dataset.deviceCode;
+            const apiUrl = `{{ route('api.device.calibration.store', ['device' => $device, 'id' => $deviceDataInfo['device_code'] ?? request()->route('id')]) }}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sensor_label: document.getElementById('modalSensorLabel').textContent.replace(/^Sensor\s+/, '').split('|')[0].trim(),
+                        sensor_type: document.getElementById('sensorType').value,
+                        current_value: document.getElementById('currentValue').value,
+                        reference_value: document.getElementById('referenceValue').value,
+                        offset_value: document.getElementById('offsetValue').value,
+                        notes: document.getElementById('calibrationNotes').value,
+                        device_code: deviceCode,
+                    }),
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(payload.details || payload.error || 'Gagal menyimpan kalibrasi');
                 }
-            } else {
-                if (!calibrationData.reference_value && !calibrationData.sensor_reading) {
-                    alert('Mohon isi nilai referensi atau nilai terbaca sensor!');
-                    return;
-                }
+
+                showToast('success', 'Berhasil', payload.message || 'Data kalibrasi berhasil dikirim ke Firebase.');
+                window.closeCalibrationModal();
+            } catch (error) {
+                showToast('error', 'Gagal', error.message || 'Terjadi kesalahan saat menyimpan kalibrasi.');
             }
-            
-            // Simpan ke localStorage untuk demo (nanti bisa diganti dengan API)
-            let calibrations = JSON.parse(localStorage.getItem('sensor_calibrations') || '[]');
-            calibrations.push(calibrationData);
-            localStorage.setItem('sensor_calibrations', JSON.stringify(calibrations));
-            
-            console.log('Data kalibrasi disimpan:', calibrationData);
-            alert(`Data kalibrasi untuk sensor ${sensorLabel} berhasil disimpan!`);
-            
-            closeCalibrationModal();
         };
-        
-        // Close modal dengan tombol Escape
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeCalibrationModal();
