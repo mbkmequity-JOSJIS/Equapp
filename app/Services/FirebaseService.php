@@ -98,6 +98,30 @@ class FirebaseService
             ->set($payload);
     }
 
+    public function getHistoryData(string $device, string $deviceCode, string $sensorType): array
+    {
+        $path = match ($device) {
+            'aquaviska' => 'water_quality',
+            'climeet' => 'weather_station',
+            default => null,
+        };
+
+        if (! $path) {
+            throw new \InvalidArgumentException('Invalid device type.');
+        }
+
+        try {
+            $data = $this->database
+                ->getReference("{$path}/{$deviceCode}/history")
+                ->getValue();
+
+            return $data ? array_values($data) : [];
+        } catch (\Exception $e) {
+            Log::error("FirebaseService Error fetching history data for device '{$device}', sensor '{$sensorType}': " . $e->getMessage());
+            return [];
+        }
+    }
+
     // public function getDataClimeet()
     // {
     //     return $this->database->getReference('climeet')->getValue() ?? [];
