@@ -16,7 +16,7 @@ class DashboardController extends Controller
 
     public function index()
     {
-        echo "Selamat datang di Dashboard EQUapp! Pilih modul untuk melihat data dan analisis.";
+        return view('home');
     }
 
 
