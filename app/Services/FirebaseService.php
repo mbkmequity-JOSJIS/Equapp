@@ -77,7 +77,7 @@ class FirebaseService
 
         try {
             $data = $this->database->getReference($path)->getValue();
-            $dataDevices = $data['Device'] ?? [];
+            $dataDevices = $data['devices'] ?? [];
             return $dataDevices;
         } catch (\Exception $e) {
             Log::error("FirebaseService Error fetching data for device '{$device}': " . $e->getMessage());
