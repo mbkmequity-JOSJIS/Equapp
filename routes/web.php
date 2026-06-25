@@ -20,7 +20,7 @@ Route::get('/test-firebase', function () {
 
     $database = $factory->createDatabase();
 
-    $data = $database->getReference('KualitasAir')->getValue();
+    $data = $database->getReference('water_quality')->getValue();
 
     return response()->json($data);
 });
