@@ -38,6 +38,7 @@ Route::post('/login', [AuthController::class, 'authenticate'])->name('login.auth
 Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('index');
+        Route::post('/update-firebase-name', [AdminController::class, 'updateFirebaseDeviceName'])->name('update.firebase.name');
         Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     });
 });

@@ -166,6 +166,39 @@
                 <form id="deviceForm" onsubmit="return false;">
                     <input type="hidden" id="deviceId">
 
+                    <!-- Tipe Perangkat & Serial Number -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                                <i class="fas fa-layer-group text-blue-400 mr-1"></i> Tipe Perangkat <span
+                                    class="text-red-500">*</span>
+                            </label>
+                            <select id="deviceType" required onchange="updateSensors()"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+                                <option value="">Pilih Tipe</option>
+                                <option value="AQUAVISKA">💧 AQUAVISKA (Monitoring Air)</option>
+                                <option value="IOT Climate">☁️ IoT Climate (Monitoring Udara)</option>
+                            </select>
+                        </div>
+                        <div id="serialNumberContainer">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                                <i class="fas fa-barcode text-blue-400 mr-1"></i> Serial Number <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="serialNumber"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                placeholder="SN-XXXX-XXXX">
+                        </div>
+                        <div id="firebaseNodeContainer" class="hidden">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                                <i class="fas fa-database text-blue-400 mr-1"></i> Node Firebase <span class="text-red-500">*</span>
+                            </label>
+                            <select id="firebaseNode" onchange="fillLocationFromFirebase(this.value)"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+                                <option value="">Pilih Node Firebase</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Nama Perangkat -->
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-slate-700 mb-2">
@@ -176,65 +209,18 @@
                             placeholder="Contoh: Sensor Air Cisadane">
                     </div>
 
-                    <!-- Serial Number & Tipe -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <i class="fas fa-barcode text-blue-400 mr-1"></i> Serial Number <span
-                                    class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="serialNumber" required
-                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                                placeholder="SN-XXXX-XXXX">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <i class="fas fa-layer-group text-blue-400 mr-1"></i> Tipe Perangkat <span
-                                    class="text-red-500">*</span>
-                            </label>
-                            <select id="deviceType" required
-                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                                <option value="">Pilih Tipe</option>
-                                <option value="AQUAVISKA">💧 AQUAVISKA (Monitoring Air)</option>
-                                <option value="IOT Climate">☁️ IoT Climate (Monitoring Udara)</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <!-- Lokasi -->
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-slate-700 mb-2">
-                            <i class="fas fa-map-marker-alt text-blue-400 mr-1"></i> Lokasi <span
-                                class="text-red-500">*</span>
+                            <i class="fas fa-map-marker-alt text-blue-400 mr-1"></i> Lokasi <span class="text-red-500">*</span>
                         </label>
-                        <select id="locationId" required
-                            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                            <option value="">Pilih Lokasi</option>
-                            @foreach ($locations ?? [] as $loc)
-                                <option value="{{ $loc['id'] }}">{{ $loc['name'] }} - {{ $loc['address'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Status & Score -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <i class="fas fa-chart-line text-blue-400 mr-1"></i> Status
-                            </label>
-                            <select id="deviceStatus"
-                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                                <option value="active">🟢 Aktif</option>
-                                <option value="inactive">🔴 Nonaktif</option>
-                                <option value="maintenance">🟡 Pemeliharaan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <i class="fas fa-chart-simple text-blue-400 mr-1"></i> Condition Score
-                            </label>
-                            <input type="number" id="conditionScore" min="0" max="100" value="75"
-                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <input type="text" id="locAddress" required placeholder="Alamat (cth: Rowo Jombor)"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                            <input type="text" id="locCity" required placeholder="Kota (cth: Klaten)"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
+                            <input type="text" id="locProvince" required placeholder="Provinsi (cth: Jawa Tengah)"
+                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent">
                         </div>
                     </div>
 
@@ -243,34 +229,8 @@
                         <label class="block text-sm font-medium text-slate-700 mb-2">
                             <i class="fas fa-microchip text-blue-400 mr-1"></i> Sensor yang Tersedia
                         </label>
-                        <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl">
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="pH Meter" class="sensor-checkbox rounded"> pH Meter
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="TDS" class="sensor-checkbox rounded"> TDS
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="Suhu Air" class="sensor-checkbox rounded"> Suhu Air
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="Kekeruhan" class="sensor-checkbox rounded"> Kekeruhan
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="PM2.5" class="sensor-checkbox rounded"> PM2.5
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="PM10" class="sensor-checkbox rounded"> PM10
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="CO2" class="sensor-checkbox rounded"> CO2
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="Suhu Udara" class="sensor-checkbox rounded"> Suhu Udara
-                            </label>
-                            <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" value="Kelembaban" class="sensor-checkbox rounded"> Kelembaban
-                            </label>
+                        <div id="sensorContainer" class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl min-h-[50px] text-sm text-slate-500">
+                            Pilih tipe perangkat terlebih dahulu untuk melihat sensor yang tersedia.
                         </div>
                     </div>
 
@@ -380,9 +340,74 @@
             }
         ];
 
+
+        const waterQualityDevices = @json($waterQualityDevices ?? []);
+
         let currentFilter = 'all';
         let currentSearch = '';
         let deleteId = null;
+
+        const sensorData = {
+            'AQUAVISKA': ['pH Meter', 'Suhu Air', 'TDS', 'Kekeruhan', 'DO/dissolved oxygen'],
+            'IOT Climate': ['PM10', 'Suhu Udara', 'Kelembaban', 'CO2', 'PM2.5']
+        };
+
+        function populateFirebaseNodes() {
+            const select = document.getElementById('firebaseNode');
+            select.innerHTML = '<option value="">Pilih Node Firebase</option>';
+            if (waterQualityDevices) {
+                for (const key in waterQualityDevices) {
+                    select.innerHTML += `<option value="${key}">${key}</option>`;
+                }
+            }
+        }
+
+        function fillLocationFromFirebase(nodeKey) {
+            if (!nodeKey || !waterQualityDevices || !waterQualityDevices[nodeKey]) {
+                document.getElementById('locAddress').value = '';
+                document.getElementById('locCity').value = '';
+                document.getElementById('locProvince').value = '';
+                document.getElementById('deviceName').value = '';
+                return;
+            }
+            const node = waterQualityDevices[nodeKey];
+            if (node.location) {
+                document.getElementById('locAddress').value = node.location.address || '';
+                document.getElementById('locCity').value = node.location.city || '';
+                document.getElementById('locProvince').value = node.location.province || '';
+            }
+            if (node.device_name) {
+                document.getElementById('deviceName').value = node.device_name || '';
+            }
+        }
+
+        function updateSensors(selectedSensors = []) {
+            const type = document.getElementById('deviceType').value;
+            const container = document.getElementById('sensorContainer');
+            
+            if (type === 'AQUAVISKA') {
+                document.getElementById('serialNumberContainer').classList.add('hidden');
+                document.getElementById('firebaseNodeContainer').classList.remove('hidden');
+                populateFirebaseNodes();
+            } else {
+                document.getElementById('serialNumberContainer').classList.remove('hidden');
+                document.getElementById('firebaseNodeContainer').classList.add('hidden');
+            }
+
+            if (!type) {
+                container.innerHTML = 'Pilih tipe perangkat terlebih dahulu untuk melihat sensor yang tersedia.';
+                return;
+            }
+
+            let mappedType = '';
+            if (type === 'AQUAVISKA') mappedType = 'AQUAVISKA';
+            else if (type === 'IOT Climate' || type === 'IoT Climate') mappedType = 'IOT Climate';
+            
+            const availableSensors = sensorData[mappedType] || [];
+            container.innerHTML = `<ul class="list-disc pl-5 text-sm text-slate-600 space-y-1">` + 
+                availableSensors.map(sensor => `<li>${sensor}</li>`).join('') + 
+                `</ul>`;
+        }
 
         // Render tabel devices
         function renderDevices() {
@@ -431,11 +456,12 @@
                     </span>
                 </td>
                 <td class="py-3.5 px-5">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
+                    <select onchange="updateDeviceStatus(${device.id}, this.value)" class="text-xs font-medium rounded-full px-2.5 py-1 focus:outline-none cursor-pointer border-none focus:ring-0
                         ${device.status === 'active' ? 'bg-green-100 text-green-700' : (device.status === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')}">
-                        <i class="fas fa-circle text-[6px]"></i>
-                        ${device.status === 'active' ? 'Aktif' : (device.status === 'inactive' ? 'Nonaktif' : 'Pemeliharaan')}
-                    </span>
+                        <option value="active" ${device.status === 'active' ? 'selected' : ''}>🟢 Aktif</option>
+                        <option value="maintenance" ${device.status === 'maintenance' ? 'selected' : ''}>🟡 Pemeliharaan</option>
+                        <option value="inactive" ${device.status === 'inactive' ? 'selected' : ''}>🔴 Nonaktif</option>
+                    </select>
                 </td>
                 <td class="py-3.5 px-5">
                     <div class="flex flex-wrap gap-1.5">
@@ -455,6 +481,15 @@
                 </td>
             </tr>
         `).join('');
+        }
+
+        // Update device status from table dropdown
+        function updateDeviceStatus(id, newStatus) {
+            const index = devices.findIndex(d => d.id === id);
+            if (index !== -1) {
+                devices[index].status = newStatus;
+                renderDevices();
+            }
         }
 
         // Escape HTML untuk keamanan
@@ -502,14 +537,17 @@
             document.getElementById('deviceId').value = '';
             document.getElementById('deviceName').value = '';
             document.getElementById('serialNumber').value = '';
+            document.getElementById('firebaseNode').value = '';
             document.getElementById('deviceType').value = '';
-            document.getElementById('locationId').value = '';
-            document.getElementById('deviceStatus').value = 'active';
-            document.getElementById('conditionScore').value = '75';
+            document.getElementById('locAddress').value = '';
+            document.getElementById('locCity').value = '';
+            document.getElementById('locProvince').value = '';
             document.getElementById('deviceDescription').value = '';
+            
+            document.getElementById('serialNumberContainer').classList.remove('hidden');
+            document.getElementById('firebaseNodeContainer').classList.add('hidden');
 
-            // Reset checkboxes
-            document.querySelectorAll('.sensor-checkbox').forEach(cb => cb.checked = false);
+            updateSensors();
 
             openModal();
         }
@@ -523,17 +561,22 @@
             document.getElementById('modalTitle').innerText = 'Edit Perangkat';
             document.getElementById('deviceId').value = device.id;
             document.getElementById('deviceName').value = device.name;
-            document.getElementById('serialNumber').value = device.serial_number;
             document.getElementById('deviceType').value = device.type;
-            document.getElementById('locationId').value = device.location_id || '';
-            document.getElementById('deviceStatus').value = device.status;
-            document.getElementById('conditionScore').value = device.condition_score;
             document.getElementById('deviceDescription').value = device.description || '';
 
-            // Set checkboxes
-            document.querySelectorAll('.sensor-checkbox').forEach(cb => {
-                cb.checked = device.sensors.includes(cb.value);
-            });
+            // Handle location
+            const locParts = (device.location || '').split(', ');
+            document.getElementById('locAddress').value = locParts[0] || '';
+            document.getElementById('locCity').value = locParts[1] || '';
+            document.getElementById('locProvince').value = locParts[2] || '';
+
+            updateSensors(device.sensors);
+            
+            if (device.type === 'AQUAVISKA') {
+                document.getElementById('firebaseNode').value = device.serial_number;
+            } else {
+                document.getElementById('serialNumber').value = device.serial_number;
+            }
 
             openModal();
         }
@@ -558,28 +601,32 @@
         function saveDevice() {
             const id = document.getElementById('deviceId').value;
             const name = document.getElementById('deviceName').value;
-            const serial_number = document.getElementById('serialNumber').value;
             const type = document.getElementById('deviceType').value;
-            const location_id = document.getElementById('locationId').value;
-            const status = document.getElementById('deviceStatus').value;
-            const condition_score = parseInt(document.getElementById('conditionScore').value) || 50;
             const description = document.getElementById('deviceDescription').value;
 
-            // Get selected sensors
-            const sensors = [];
-            document.querySelectorAll('.sensor-checkbox:checked').forEach(cb => {
-                sensors.push(cb.value);
-            });
+            let serial_number = '';
+            if (type === 'AQUAVISKA') {
+                serial_number = document.getElementById('firebaseNode').value;
+            } else {
+                serial_number = document.getElementById('serialNumber').value;
+            }
+
+            const address = document.getElementById('locAddress').value;
+            const city = document.getElementById('locCity').value;
+            const province = document.getElementById('locProvince').value;
+            const locationName = [address, city, province].filter(Boolean).join(', ');
+
+            // Get selected sensors based on type
+            let mappedType = '';
+            if (type === 'AQUAVISKA') mappedType = 'AQUAVISKA';
+            else if (type === 'IOT Climate' || type === 'IoT Climate') mappedType = 'IOT Climate';
+            const sensors = sensorData[mappedType] || [];
 
             // Validation
-            if (!name || !serial_number || !type || !location_id) {
+            if (!name || !serial_number || !type || !address) {
                 alert('Mohon lengkapi semua field yang diperlukan!');
                 return;
             }
-
-            // Get location name (simulasi)
-            const locationSelect = document.getElementById('locationId');
-            const locationName = locationSelect.options[locationSelect.selectedIndex]?.text.split(' - ')[0] || 'Lokasi';
 
             if (id) {
                 // Edit device
@@ -590,10 +637,7 @@
                         name,
                         serial_number,
                         type,
-                        location_id,
                         location: locationName,
-                        status,
-                        condition_score,
                         sensors,
                         description
                     };
@@ -607,14 +651,33 @@
                     name,
                     serial_number,
                     type,
-                    location_id,
                     location: locationName,
-                    status,
-                    condition_score,
+                    status: 'active',
+                    condition_score: 100,
                     sensors,
                     description
                 });
                 alert('Perangkat berhasil ditambahkan!');
+            }
+
+            // update in firebase
+            if (type === 'AQUAVISKA' && serial_number) {
+                const originalName = waterQualityDevices[serial_number]?.device_name;
+                if (originalName !== name) {
+                    fetch('{{ route("admin.update.firebase.name") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ node: serial_number, name: name })
+                    }).catch(err => console.error(err));
+                    
+                    // Update frontend state
+                    if (waterQualityDevices[serial_number]) {
+                        waterQualityDevices[serial_number].device_name = name;
+                    }
+                }
             }
 
             closeModal();
