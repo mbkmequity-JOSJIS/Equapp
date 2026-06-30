@@ -33,6 +33,12 @@ class DeviceController extends Controller
             abort(404);
         }
 
+        // Filter hanya yang is_preview = true
+        $dataDevices = array_filter($dataDevices, function ($item) {
+            return isset($item['is_preview']) && $item['is_preview'] === true && $item['is_deleted'] === false;
+        });
+
+        // dd($dataDevices);
         return view('devices.device-list', compact('dataDevices', 'device'));
     }
 
