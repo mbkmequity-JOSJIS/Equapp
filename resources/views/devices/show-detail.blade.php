@@ -9,6 +9,11 @@
             position: relative;
         }
 
+        .sensor-card.is-updated {
+            border-color: rgba(34, 197, 94, 0.75) !important;
+            box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.28), 0 0 24px rgba(34, 197, 94, 0.2), 0 12px 24px -12px rgba(34, 197, 94, 0.45) !important;
+        }
+
         .sensor-status {
             display: inline-flex;
             align-items: center;
@@ -47,7 +52,7 @@
 
         .seven-seg-value {
             font-family: 'Orbitron', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-            font-size: 2.45rem;
+            font-size: 3rem;
             line-height: 1;
             letter-spacing: 0;
             font-weight: 500;
@@ -151,80 +156,81 @@
                 transform: scale(1.5);
                 opacity: 0;
             }
-        /* Modal Custom Styles */
-        .modal-transition {
-            transition: opacity 0.2s ease, visibility 0.2s ease;
-        }
 
-        .modal-transition.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .modal-transition:not(.hidden) {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* AI Recommendations Styles */
-        .ai-card {
-            transition: all 0.3s ease;
-        }
-
-        .ai-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .progress-ring {
-            transition: stroke-dashoffset 0.5s ease;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-
-        /* Animasi bounce untuk floating button */
-        @keyframes soft-bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
+            /* Modal Custom Styles */
+            .modal-transition {
+                transition: opacity 0.2s ease, visibility 0.2s ease;
             }
 
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        .whatsapp-float {
-            animation: soft-bounce 2s ease-in-out infinite;
-        }
-
-        /* Pulse ring effect */
-        .pulse-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background-color: rgba(16, 185, 129, 0.4);
-            animation: pulse-ring 1.5s ease-out infinite;
-            pointer-events: none;
-        }
-
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(1);
-                opacity: 0.6;
-            }
-
-            100% {
-                transform: scale(1.5);
+            .modal-transition.hidden {
                 opacity: 0;
+                visibility: hidden;
             }
-        }
+
+            .modal-transition:not(.hidden) {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            /* AI Recommendations Styles */
+            .ai-card {
+                transition: all 0.3s ease;
+            }
+
+            .ai-card:hover {
+                transform: translateY(-2px);
+            }
+
+            .progress-ring {
+                transition: stroke-dashoffset 0.5s ease;
+            }
+
+            /* Chart Container */
+            .chart-container {
+                position: relative;
+                height: 300px;
+                width: 100%;
+            }
+
+            /* Animasi bounce untuk floating button */
+            @keyframes soft-bounce {
+
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            .whatsapp-float {
+                animation: soft-bounce 2s ease-in-out infinite;
+            }
+
+            /* Pulse ring effect */
+            .pulse-ring {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background-color: rgba(16, 185, 129, 0.4);
+                animation: pulse-ring 1.5s ease-out infinite;
+                pointer-events: none;
+            }
+
+            @keyframes pulse-ring {
+                0% {
+                    transform: scale(1);
+                    opacity: 0.6;
+                }
+
+                100% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+            }
     </style>
 @endsection
 
@@ -237,7 +243,10 @@
         $deviceStatus = $deviceDataInfo['status'] ?? 'normal';
         $statusTone = $deviceStatus === 'normal' ? 'good' : ($deviceStatus === 'waspada' ? 'medium' : 'bad');
         $excludedSensorLabels = ['tekanan', 'totalhujan', 'rainfall', 'curah', 'pressure'];
-        $sensorCards = array_filter($deviceDataMonitoring['sensors'] ?? [], fn($sensor) => ! in_array(strtolower(str_replace(' ', '', $sensor['label'])), $excludedSensorLabels, true));
+        $sensorCards = array_filter(
+            $deviceDataMonitoring['sensors'] ?? [],
+            fn($sensor) => !in_array(strtolower(str_replace(' ', '', $sensor['label'])), $excludedSensorLabels, true),
+        );
         $detailApi = route('api.device.detail', [
             'device' => $device,
             'id' => $deviceDataInfo['device_code'] ?? request()->route('id'),
@@ -345,36 +354,72 @@
 
                             // Determine icon (keep previous mapping)
                             $icon = match (true) {
-                                str_contains(strtolower($sensor['label']), 'temperatur') || str_contains(strtolower($sensor['label']), 'suhu') => 'thermometer-half',
+                                str_contains(strtolower($sensor['label']), 'temperatur') ||
+                                    str_contains(strtolower($sensor['label']), 'suhu')
+                                    => 'thermometer-half',
                                 str_contains($sensor['label'], 'pH') => 'flask',
-                                str_contains(strtolower($sensor['label']), 'turbidity') || str_contains(strtolower($sensor['label']), 'kekeruhan') => 'eye',
-                                str_contains(strtolower($sensor['label']), 'dissolved oxygen') || str_contains(strtolower($sensor['label']), 'do') => 'wind',
+                                str_contains(strtolower($sensor['label']), 'turbidity') ||
+                                    str_contains(strtolower($sensor['label']), 'kekeruhan')
+                                    => 'eye',
+                                str_contains(strtolower($sensor['label']), 'dissolved oxygen') ||
+                                    str_contains(strtolower($sensor['label']), 'do')
+                                    => 'wind',
                                 str_contains(strtolower($sensor['label']), 'total dissolved solids') => 'tint',
-                                str_contains(strtolower($sensor['label']), 'kelembapan') || str_contains(strtolower($sensor['label']), 'kelembaban') => 'droplet',
-                                str_contains(strtolower($sensor['label']), 'tvoc') || str_contains(strtolower($sensor['label']), 'co2') => 'cloud',
+                                str_contains(strtolower($sensor['label']), 'kelembapan') ||
+                                    str_contains(strtolower($sensor['label']), 'kelembaban')
+                                    => 'droplet',
+                                str_contains(strtolower($sensor['label']), 'tvoc') ||
+                                    str_contains(strtolower($sensor['label']), 'co2')
+                                    => 'cloud',
                                 str_contains(strtolower($sensor['label']), 'uv') => 'sun',
-                                str_contains(strtolower($sensor['label']), 'pm25') || str_contains(strtolower($sensor['label']), 'pm 25') => 'smog',
-                                str_contains(strtolower($sensor['label']), 'hujan') || str_contains(strtolower($sensor['label']), 'rain') => 'cloud-rain',
+                                str_contains(strtolower($sensor['label']), 'pm25') ||
+                                    str_contains(strtolower($sensor['label']), 'pm 25')
+                                    => 'smog',
+                                str_contains(strtolower($sensor['label']), 'hujan') ||
+                                    str_contains(strtolower($sensor['label']), 'rain')
+                                    => 'cloud-rain',
                                 default => 'microchip',
                             };
 
                             // Translate label to Indonesian (display only)
                             $labelLower = strtolower($sensor['label']);
-                            if (str_contains($labelLower, 'intensitas') || str_contains($labelLower, 'hujan') || str_contains($labelLower, 'curah')) {
+                            if (
+                                str_contains($labelLower, 'intensitas') ||
+                                str_contains($labelLower, 'hujan') ||
+                                str_contains($labelLower, 'curah')
+                            ) {
                                 $displayLabel = 'Intensitas Hujan';
-                            } elseif (str_contains($labelLower, 'kelembab') || str_contains($labelLower, 'kelembapan') || str_contains($labelLower, 'humidity')) {
+                            } elseif (
+                                str_contains($labelLower, 'kelembab') ||
+                                str_contains($labelLower, 'kelembapan') ||
+                                str_contains($labelLower, 'humidity')
+                            ) {
                                 $displayLabel = 'Kelembaban';
-                            } elseif (str_contains($labelLower, 'wind') || str_contains($labelLower, 'kecepatan') || str_contains($labelLower, 'angin') || str_contains($labelLower, 'wind speed')) {
+                            } elseif (
+                                str_contains($labelLower, 'wind') ||
+                                str_contains($labelLower, 'kecepatan') ||
+                                str_contains($labelLower, 'angin') ||
+                                str_contains($labelLower, 'wind speed')
+                            ) {
                                 $displayLabel = 'Kecepatan Angin';
                             } elseif (str_contains($labelLower, 'pm25') || str_contains($labelLower, 'pm 25')) {
                                 $displayLabel = 'PM2.5';
                             } elseif (str_contains($labelLower, 'temperatur') || str_contains($labelLower, 'suhu')) {
                                 $displayLabel = 'Temperatur';
-                            } elseif (str_contains($labelLower, 'kekeruhan') || str_contains($labelLower, 'turbidity')) {
+                            } elseif (
+                                str_contains($labelLower, 'kekeruhan') ||
+                                str_contains($labelLower, 'turbidity')
+                            ) {
                                 $displayLabel = 'Kekeruhan';
-                            } elseif (str_contains($labelLower, 'dissolved oxygen') || str_contains($labelLower, 'do')) {
+                            } elseif (
+                                str_contains($labelLower, 'dissolved oxygen') ||
+                                str_contains($labelLower, 'do')
+                            ) {
                                 $displayLabel = 'Oksigen Terlarut';
-                            } elseif (str_contains($labelLower, 'total dissolved solids') || str_contains($labelLower, 'tds')) {
+                            } elseif (
+                                str_contains($labelLower, 'total dissolved solids') ||
+                                str_contains($labelLower, 'tds')
+                            ) {
                                 $displayLabel = 'TDS';
                             } elseif (str_contains($labelLower, 'uv')) {
                                 $displayLabel = 'Indeks UV';
@@ -385,16 +430,28 @@
                                 $displayLabel = ucwords(str_replace(['_', '-'], ' ', $sensor['label']));
                             }
 
+
                             // Determine unit defaults if empty
-                            $unit = trim((string)($sensor['unit'] ?? ''));
+                            $unit = trim((string) ($sensor['unit'] ?? ''));
                             if ($unit === '') {
-                                if (str_contains($labelLower, 'intensitas') || str_contains($labelLower, 'hujan') || str_contains($labelLower, 'curah')) {
+                                if (
+                                    str_contains($labelLower, 'intensitas') ||
+                                    str_contains($labelLower, 'hujan') ||
+                                    str_contains($labelLower, 'curah')
+                                ) {
                                     $unit = 'mm/day';
-                                } elseif (str_contains($labelLower, 'kelembab') || str_contains($labelLower, 'kelembapan')) {
+                                } elseif (
+                                    str_contains($labelLower, 'kelembab') ||
+                                    str_contains($labelLower, 'kelembapan')
+                                ) {
                                     $unit = '%RH';
                                 } elseif (str_contains($labelLower, 'pm25') || str_contains($labelLower, 'pm 25')) {
                                     $unit = 'µg/m³';
-                                } elseif (str_contains($labelLower, 'wind') || str_contains($labelLower, 'angin') || str_contains($labelLower, 'kecepatan')) {
+                                } elseif (
+                                    str_contains($labelLower, 'wind') ||
+                                    str_contains($labelLower, 'angin') ||
+                                    str_contains($labelLower, 'kecepatan')
+                                ) {
                                     $unit = 'm/s';
                                 }
                             }
@@ -405,7 +462,8 @@
                             data-sensor-label="{{ $sensor['label'] }}">
                             <span class="sensor-status {{ $sensorTone }}">{{ ucfirst($sensor['status']) }}</span>
                             <div class="flex items-center gap-4">
-                                <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-xl text-slate-700">
+                                <div
+                                    class="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-xl text-slate-700">
                                     <i class="fas fa-{{ $icon }}"></i>
                                 </div>
                                 <div class="min-w-0 flex-1">
@@ -415,7 +473,9 @@
 
                             <div class="text-center w-full mt-6">
                                 <div class="sensor-display">
-                                    <span class="sensor-value seven-seg-value">{{ $sensor['value'] }}</span>
+                                    <span class="sensor-value seven-seg-value text-[2rem]" data-current-value="{{ $sensor['value'] }}">
+                                        {{ $sensor['value'] }}
+                                    </span>
                                     <span class="seven-seg-unit">{{ $unit }}</span>
                                 </div>
                             </div>
@@ -741,9 +801,28 @@
             const apiUrl = root.dataset.deviceApi;
             const pollInterval = 5000;
             let lastSignature = '';
+            const highlightTimers = new WeakMap();
 
             function statusClass(status) {
                 return status === 'normal' ? 'good' : (status === 'waspada' ? 'medium' : 'bad');
+            }
+
+            function flashUpdatedCard(card) {
+                if (!card) return;
+
+                const existingTimer = highlightTimers.get(card);
+                if (existingTimer) {
+                    clearTimeout(existingTimer);
+                }
+
+                card.classList.add('is-updated');
+
+                const timer = window.setTimeout(() => {
+                    card.classList.remove('is-updated');
+                    highlightTimers.delete(card);
+                }, 1800);
+
+                highlightTimers.set(card, timer);
             }
 
             async function fetchDeviceDetail() {
@@ -812,8 +891,14 @@
                     const valueEl = card.querySelector('.sensor-value');
                     const statusEl = card.querySelector('.sensor-status');
                     const barEl = card.querySelector('.sensor-bar-fill');
+                    const nextValue = sensor.value ?? '—';
+                    const previousValue = valueEl?.dataset.currentValue ?? valueEl?.textContent?.trim() ?? '';
+                    const valueChanged = String(previousValue).trim() !== String(nextValue).trim();
 
-                    if (valueEl) valueEl.textContent = sensor.value;
+                    if (valueEl) {
+                        valueEl.textContent = nextValue;
+                        valueEl.dataset.currentValue = String(nextValue);
+                    }
                     if (statusEl) {
                         const tone = statusClass(sensor.status);
                         statusEl.textContent = sensor.status.charAt(0).toUpperCase() + sensor.status.slice(1);
@@ -823,6 +908,10 @@
                         const tone = statusClass(sensor.status);
                         barEl.className = `sensor-bar-fill ${tone}`;
                         barEl.style.width = `${sensor.pct}%`;
+                    }
+
+                    if (valueChanged) {
+                        flashUpdatedCard(card);
                     }
                 });
             }
