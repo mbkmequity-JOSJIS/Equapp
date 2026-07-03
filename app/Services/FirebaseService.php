@@ -85,6 +85,8 @@ class FirebaseService
         }
     }
 
+
+
     public function setCalibration(string $device, string $deviceCode, array $data)
     {
         $path = match ($device) {
