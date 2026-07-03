@@ -38,7 +38,9 @@ Route::post('/login', [AuthController::class, 'authenticate'])->name('login.auth
 Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('index');
-        Route::post('/update-firebase-name', [AdminController::class, 'updateFirebaseDeviceName'])->name('update.firebase.name');
+        Route::post('/update-firebase-status', [AdminController::class, 'updateFirebaseStatus'])->name('update.firebase.status');
+        Route::post('/save-firebase-device', [AdminController::class, 'saveFirebaseDevice'])->name('save.firebase.device');
+        Route::post('/delete-firebase-device', [AdminController::class, 'deleteFirebaseDevice'])->name('delete.firebase.device');
         Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     });
 });

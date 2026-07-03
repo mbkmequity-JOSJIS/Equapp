@@ -165,13 +165,14 @@
             <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
                 <form id="deviceForm" onsubmit="return false;">
                     <input type="hidden" id="deviceId">
+                    <input type="hidden" id="oldDeviceNode">
+                    <input type="hidden" id="oldDeviceType">
 
-                    <!-- Tipe Perangkat & Serial Number -->
+                    <!-- Tipe Perangkat & Node -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <i class="fas fa-layer-group text-blue-400 mr-1"></i> Tipe Perangkat <span
-                                    class="text-red-500">*</span>
+                                <i class="fas fa-layer-group text-blue-400 mr-1"></i> Tipe Perangkat <span class="text-red-500">*</span>
                             </label>
                             <select id="deviceType" required onchange="updateSensors()"
                                 class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
@@ -180,21 +181,13 @@
                                 <option value="IOT Climate">☁️ IoT Climate (Monitoring Udara)</option>
                             </select>
                         </div>
-                        <div id="serialNumberContainer">
+                        <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <i class="fas fa-barcode text-blue-400 mr-1"></i> Serial Number <span class="text-red-500">*</span>
+                                <i class="fas fa-database text-blue-400 mr-1"></i> Pilih Node Firebase <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" id="serialNumber"
-                                class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                                placeholder="SN-XXXX-XXXX">
-                        </div>
-                        <div id="firebaseNodeContainer" class="hidden">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <i class="fas fa-database text-blue-400 mr-1"></i> Node Firebase <span class="text-red-500">*</span>
-                            </label>
-                            <select id="firebaseNode" onchange="fillLocationFromFirebase(this.value)"
+                            <select id="firebaseNode" required onchange="fillDataFromFirebase(this.value)"
                                 class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                                <option value="">Pilih Node Firebase</option>
+                                <option value="">Pilih Tipe Perangkat Dulu</option>
                             </select>
                         </div>
                     </div>
@@ -289,59 +282,50 @@
 
 @section('script')
     <script>
-        // Data devices (simulasi - nanti diganti dengan data dari database)
-        let devices = [{
-                id: 1,
-                name: 'Sensor Air Cisadane',
-                serial_number: 'AQV-001',
-                type: 'AQUAVISKA',
-                location: 'Cisadane, Tangerang',
-                location_id: 1,
-                status: 'active',
-                condition_score: 85,
-                sensors: ['pH Meter', 'TDS', 'Suhu Air', 'Kekeruhan'],
-                description: 'Sensor pemantauan kualitas air Sungai Cisadane'
-            },
-            {
-                id: 2,
-                name: 'Sensor Udara Jakarta Pusat',
-                serial_number: 'IOT-001',
-                type: 'IOT Climate',
-                location: 'Jakarta Pusat',
-                location_id: 2,
-                status: 'active',
-                condition_score: 62,
-                sensors: ['PM2.5', 'PM10', 'CO2', 'Suhu Udara'],
-                description: 'Sensor pemantauan kualitas udara di area perkantoran'
-            },
-            {
-                id: 3,
-                name: 'Sensor Air Bengawan Solo',
-                serial_number: 'AQV-002',
-                type: 'AQUAVISKA',
-                location: 'Bengawan Solo, Surakarta',
-                location_id: 3,
-                status: 'maintenance',
-                condition_score: 45,
-                sensors: ['pH Meter', 'TDS', 'Suhu Air'],
-                description: 'Sensor pemantauan kualitas air Bengawan Solo'
-            },
-            {
-                id: 4,
-                name: 'Sensor Udara Bandung',
-                serial_number: 'IOT-002',
-                type: 'IOT Climate',
-                location: 'Bandung, Jawa Barat',
-                location_id: 4,
-                status: 'inactive',
-                condition_score: 30,
-                sensors: ['PM2.5', 'PM10', 'Suhu Udara', 'Kelembaban'],
-                description: 'Sensor pemantauan kualitas udara Kota Bandung'
-            }
-        ];
-
-
         const waterQualityDevices = @json($waterQualityDevices ?? []);
+        const weatherStationDevices = @json($weatherStationDevices ?? []);
+
+        let devices = [];
+        
+        Object.keys(waterQualityDevices).forEach(key => {
+            if (!waterQualityDevices[key] || typeof waterQualityDevices[key] !== 'object') return;
+            const d = waterQualityDevices[key];
+            devices.push({
+                id: key,
+                node: key,
+                name: d.device_name || '',
+                serial_number: d.device_code || '',
+                type: 'AQUAVISKA',
+                location: [d.location?.address, d.location?.city, d.location?.province].filter(Boolean).join(', '),
+                location_data: d.location || {},
+                status: d.status || 'offline',
+                description: d.description || '',
+                sensors: ['pH Meter', 'Suhu Air', 'TDS', 'Kekeruhan', 'DO/dissolved oxygen'],
+                is_preview: d.is_preview === true || d.is_preview === "true",
+                is_deleted: d.is_deleted === true || d.is_deleted === "true",
+                original_data: d
+            });
+        });
+
+        Object.keys(weatherStationDevices).forEach(key => {
+            if (!weatherStationDevices[key] || typeof weatherStationDevices[key] !== 'object') return;
+            const d = weatherStationDevices[key];
+            devices.push({
+                id: key,
+                node: key,
+                name: d.device_name || '',
+                serial_number: d.device_code || '',
+                type: 'IOT Climate',
+                location: [d.location?.address, d.location?.city, d.location?.province].filter(Boolean).join(', '),
+                location_data: d.location || {},
+                status: d.status || 'offline',
+                description: d.description || '',
+                sensors: ['PM10', 'Suhu Udara', 'Kelembaban', 'CO2', 'PM2.5'],
+                is_preview: d.is_preview === true || d.is_preview === "true",
+                is_deleted: d.is_deleted === true || d.is_deleted === "true",
+                original_data: d
+            });
+        });
 
         let currentFilter = 'all';
         let currentSearch = '';
@@ -352,47 +336,66 @@
             'IOT Climate': ['PM10', 'Suhu Udara', 'Kelembaban', 'CO2', 'PM2.5']
         };
 
-        function populateFirebaseNodes() {
+        function populateFirebaseNodes(type, selectedNode = null) {
             const select = document.getElementById('firebaseNode');
             select.innerHTML = '<option value="">Pilih Node Firebase</option>';
-            if (waterQualityDevices) {
-                for (const key in waterQualityDevices) {
-                    select.innerHTML += `<option value="${key}">${key}</option>`;
+            
+            let dataObj = null;
+            if (type === 'AQUAVISKA') {
+                dataObj = waterQualityDevices;
+            } else if (type === 'IOT Climate' || type === 'IoT Climate') {
+                dataObj = weatherStationDevices;
+            }
+
+            if (dataObj) {
+                for (const key in dataObj) {
+                    if (dataObj.hasOwnProperty(key) && typeof dataObj[key] === 'object') {
+                        const node = dataObj[key];
+                        // Hanya tampilkan node yang belum di-approve (is_preview != true) ATAU node yang sedang di-edit
+                        const isApproved = node.is_preview === true || node.is_preview === "true";
+                        const isDeleted = node.is_deleted === true || node.is_deleted === "true";
+                        
+                        if (!isApproved || isDeleted || key === selectedNode) {
+                            select.innerHTML += `<option value="${key}">${key}</option>`;
+                        }
+                    }
                 }
             }
         }
 
-        function fillLocationFromFirebase(nodeKey) {
-            if (!nodeKey || !waterQualityDevices || !waterQualityDevices[nodeKey]) {
+        function fillDataFromFirebase(nodeKey) {
+            const type = document.getElementById('deviceType').value;
+            let dataObj = null;
+            if (type === 'AQUAVISKA') {
+                dataObj = waterQualityDevices;
+            } else if (type === 'IOT Climate' || type === 'IoT Climate') {
+                dataObj = weatherStationDevices;
+            }
+
+            if (!nodeKey || !dataObj || !dataObj[nodeKey]) {
+                document.getElementById('deviceName').value = '';
                 document.getElementById('locAddress').value = '';
                 document.getElementById('locCity').value = '';
                 document.getElementById('locProvince').value = '';
-                document.getElementById('deviceName').value = '';
                 return;
             }
-            const node = waterQualityDevices[nodeKey];
+
+            const node = dataObj[nodeKey];
+            if (node.device_name) {
+                document.getElementById('deviceName').value = node.device_name || '';
+            }
             if (node.location) {
                 document.getElementById('locAddress').value = node.location.address || '';
                 document.getElementById('locCity').value = node.location.city || '';
                 document.getElementById('locProvince').value = node.location.province || '';
             }
-            if (node.device_name) {
-                document.getElementById('deviceName').value = node.device_name || '';
-            }
         }
 
-        function updateSensors(selectedSensors = []) {
+        function updateSensors(selectedNode = null) {
             const type = document.getElementById('deviceType').value;
             const container = document.getElementById('sensorContainer');
-            
-            if (type === 'AQUAVISKA') {
-                document.getElementById('serialNumberContainer').classList.add('hidden');
-                document.getElementById('firebaseNodeContainer').classList.remove('hidden');
-                populateFirebaseNodes();
-            } else {
-                document.getElementById('serialNumberContainer').classList.remove('hidden');
-                document.getElementById('firebaseNodeContainer').classList.add('hidden');
-            }
+
+            populateFirebaseNodes(type, selectedNode);
 
             if (!type) {
                 container.innerHTML = 'Pilih tipe perangkat terlebih dahulu untuk melihat sensor yang tersedia.';
@@ -409,9 +412,8 @@
                 `</ul>`;
         }
 
-        // Render tabel devices
         function renderDevices() {
-            let filtered = [...devices];
+            let filtered = devices.filter(d => d.is_preview === true && d.is_deleted !== true);
 
             // Filter by type
             if (currentFilter !== 'all') {
@@ -443,7 +445,7 @@
 
             tbody.innerHTML = filtered.map(device => `
             <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                <td class="py-3.5 px-5 text-sm text-slate-500">${device.id}</td>
+                <td class="py-3.5 px-5 text-sm text-slate-500">${device.node}</td>
                 <td class="py-3.5 px-5">
                     <div class="font-medium text-slate-800">${escapeHtml(device.name)}</div>
                     <div class="text-xs text-slate-400">${escapeHtml(device.serial_number)}</div>
@@ -456,11 +458,10 @@
                     </span>
                 </td>
                 <td class="py-3.5 px-5">
-                    <select onchange="updateDeviceStatus(${device.id}, this.value)" class="text-xs font-medium rounded-full px-2.5 py-1 focus:outline-none cursor-pointer border-none focus:ring-0
-                        ${device.status === 'active' ? 'bg-green-100 text-green-700' : (device.status === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')}">
-                        <option value="active" ${device.status === 'active' ? 'selected' : ''}>🟢 Aktif</option>
-                        <option value="maintenance" ${device.status === 'maintenance' ? 'selected' : ''}>🟡 Pemeliharaan</option>
-                        <option value="inactive" ${device.status === 'inactive' ? 'selected' : ''}>🔴 Nonaktif</option>
+                    <select onchange="updateDeviceStatus('${device.node}', '${device.type}', this.value)" class="text-xs font-medium rounded-full px-2.5 py-1 focus:outline-none cursor-pointer border-none focus:ring-0
+                        ${device.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                        <option value="online" ${device.status === 'online' ? 'selected' : ''}>🟢 Online</option>
+                        <option value="offline" ${device.status === 'offline' ? 'selected' : ''}>🔴 Offline</option>
                     </select>
                 </td>
                 <td class="py-3.5 px-5">
@@ -471,10 +472,10 @@
                 </td>
                 <td class="py-3.5 px-5">
                     <div class="flex gap-2">
-                        <button onclick="openEditModal(${device.id})" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                        <button onclick="openEditModal('${device.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="openDeleteModal(${device.id})" class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition">
+                        <button onclick="openDeleteModal('${device.id}')" class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
@@ -484,11 +485,33 @@
         }
 
         // Update device status from table dropdown
-        function updateDeviceStatus(id, newStatus) {
-            const index = devices.findIndex(d => d.id === id);
+        function updateDeviceStatus(node, type, newStatus) {
+            const index = devices.findIndex(d => d.node === node && d.type === type);
             if (index !== -1) {
+                const oldStatus = devices[index].status;
                 devices[index].status = newStatus;
-                renderDevices();
+                renderDevices(); // optimistically update view
+
+                fetch('{{ route("admin.update.firebase.status") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ node: node, type: type, status: newStatus })
+                }).then(res => res.json())
+                  .then(data => {
+                      if (!data.success) {
+                          alert('Gagal mengupdate status');
+                          devices[index].status = oldStatus;
+                          renderDevices();
+                      }
+                  }).catch(err => {
+                      console.error(err);
+                      alert('Gagal mengupdate status');
+                      devices[index].status = oldStatus;
+                      renderDevices();
+                  });
             }
         }
 
@@ -535,20 +558,20 @@
             document.getElementById('modalIcon').className = 'fas fa-plus-circle text-blue-500';
             document.getElementById('modalTitle').innerText = 'Tambah Perangkat Baru';
             document.getElementById('deviceId').value = '';
-            document.getElementById('deviceName').value = '';
-            document.getElementById('serialNumber').value = '';
-            document.getElementById('firebaseNode').value = '';
+            document.getElementById('oldDeviceNode').value = '';
+            document.getElementById('oldDeviceType').value = '';
+            
             document.getElementById('deviceType').value = '';
+            updateSensors();
+
+            document.getElementById('deviceName').value = '';
+            document.getElementById('firebaseNode').value = '';
+            
             document.getElementById('locAddress').value = '';
             document.getElementById('locCity').value = '';
             document.getElementById('locProvince').value = '';
             document.getElementById('deviceDescription').value = '';
             
-            document.getElementById('serialNumberContainer').classList.remove('hidden');
-            document.getElementById('firebaseNodeContainer').classList.add('hidden');
-
-            updateSensors();
-
             openModal();
         }
 
@@ -560,23 +583,20 @@
             document.getElementById('modalIcon').className = 'fas fa-edit text-blue-500';
             document.getElementById('modalTitle').innerText = 'Edit Perangkat';
             document.getElementById('deviceId').value = device.id;
-            document.getElementById('deviceName').value = device.name;
-            document.getElementById('deviceType').value = device.type;
-            document.getElementById('deviceDescription').value = device.description || '';
-
-            // Handle location
-            const locParts = (device.location || '').split(', ');
-            document.getElementById('locAddress').value = locParts[0] || '';
-            document.getElementById('locCity').value = locParts[1] || '';
-            document.getElementById('locProvince').value = locParts[2] || '';
-
-            updateSensors(device.sensors);
+            document.getElementById('oldDeviceNode').value = device.node;
+            document.getElementById('oldDeviceType').value = device.type;
             
-            if (device.type === 'AQUAVISKA') {
-                document.getElementById('firebaseNode').value = device.serial_number;
-            } else {
-                document.getElementById('serialNumber').value = device.serial_number;
-            }
+            document.getElementById('deviceType').value = device.type;
+            updateSensors(device.node);
+
+            document.getElementById('firebaseNode').value = device.node;
+            document.getElementById('deviceName').value = device.name;
+            
+            document.getElementById('locAddress').value = device.location_data?.address || '';
+            document.getElementById('locCity').value = device.location_data?.city || '';
+            document.getElementById('locProvince').value = device.location_data?.province || '';
+            
+            document.getElementById('deviceDescription').value = device.description || '';
 
             openModal();
         }
@@ -600,88 +620,74 @@
         // Save device
         function saveDevice() {
             const id = document.getElementById('deviceId').value;
+            const oldNode = document.getElementById('oldDeviceNode').value;
+            const oldType = document.getElementById('oldDeviceType').value;
+            
+            const node = document.getElementById('firebaseNode').value;
             const name = document.getElementById('deviceName').value;
             const type = document.getElementById('deviceType').value;
             const description = document.getElementById('deviceDescription').value;
-
-            let serial_number = '';
-            if (type === 'AQUAVISKA') {
-                serial_number = document.getElementById('firebaseNode').value;
-            } else {
-                serial_number = document.getElementById('serialNumber').value;
-            }
-
+            
             const address = document.getElementById('locAddress').value;
             const city = document.getElementById('locCity').value;
             const province = document.getElementById('locProvince').value;
-            const locationName = [address, city, province].filter(Boolean).join(', ');
-
-            // Get selected sensors based on type
-            let mappedType = '';
-            if (type === 'AQUAVISKA') mappedType = 'AQUAVISKA';
-            else if (type === 'IOT Climate' || type === 'IoT Climate') mappedType = 'IOT Climate';
-            const sensors = sensorData[mappedType] || [];
 
             // Validation
-            if (!name || !serial_number || !type || !address) {
-                alert('Mohon lengkapi semua field yang diperlukan!');
+            if (!node || !name || !type || !address || !city || !province) {
+                alert('Mohon lengkapi semua field yang diperlukan (Nama, Tipe, Node, Lokasi)!');
                 return;
             }
 
-            if (id) {
-                // Edit device
-                const index = devices.findIndex(d => d.id == id);
-                if (index !== -1) {
-                    devices[index] = {
-                        ...devices[index],
-                        name,
-                        serial_number,
-                        type,
-                        location: locationName,
-                        sensors,
-                        description
-                    };
-                    alert('Perangkat berhasil diupdate!');
+            const deviceStatus = id ? (devices.find(d => d.id === id)?.status || 'offline') : 'offline';
+            
+            const payload = {
+                old_node: oldNode,
+                old_type: oldType,
+                node: node,
+                device_name: name,
+                type: type,
+                description: description,
+                status: deviceStatus,
+                location: {
+                    address: address,
+                    city: city,
+                    province: province,
+                    latitude: id ? (devices.find(d => d.id === id)?.location_data?.latitude || 0) : 0,
+                    longitude: id ? (devices.find(d => d.id === id)?.location_data?.longitude || 0) : 0
                 }
-            } else {
-                // Add new device
-                const newId = Math.max(...devices.map(d => d.id), 0) + 1;
-                devices.push({
-                    id: newId,
-                    name,
-                    serial_number,
-                    type,
-                    location: locationName,
-                    status: 'active',
-                    condition_score: 100,
-                    sensors,
-                    description
-                });
-                alert('Perangkat berhasil ditambahkan!');
-            }
+            };
+            
+            // Tampilkan state loading (opsional)
+            const saveBtn = document.querySelector('button[onclick="saveDevice()"]');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
+            saveBtn.disabled = true;
 
-            // update in firebase
-            if (type === 'AQUAVISKA' && serial_number) {
-                const originalName = waterQualityDevices[serial_number]?.device_name;
-                if (originalName !== name) {
-                    fetch('{{ route("admin.update.firebase.name") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ node: serial_number, name: name })
-                    }).catch(err => console.error(err));
-                    
-                    // Update frontend state
-                    if (waterQualityDevices[serial_number]) {
-                        waterQualityDevices[serial_number].device_name = name;
-                    }
+            fetch('{{ route("admin.save.firebase.device") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    alert('Perangkat berhasil disimpan! Silakan muat ulang halaman untuk melihat perubahan jika perlu.');
+                    location.reload(); // Refresh to get fresh data from firebase
+                } else {
+                    alert('Gagal menyimpan perangkat ke Firebase.');
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
                 }
-            }
-
-            closeModal();
-            renderDevices();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan saat menyimpan data.');
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            });
         }
 
         // Open delete modal
@@ -706,13 +712,41 @@
             document.body.style.overflow = '';
         }
 
-        // Confirm delete device
         function confirmDeleteDevice() {
             if (deleteId) {
-                devices = devices.filter(d => d.id !== deleteId);
-                alert('Perangkat berhasil dihapus!');
-                closeDeleteModal();
-                renderDevices();
+                const device = devices.find(d => d.id === deleteId);
+                if (!device) return;
+
+                const deleteBtn = document.querySelector('button[onclick="confirmDeleteDevice()"]');
+                const originalText = deleteBtn.innerHTML;
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+                deleteBtn.disabled = true;
+
+                fetch('{{ route("admin.delete.firebase.device") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ node: device.node, type: device.type })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Perangkat berhasil dihapus!');
+                        location.reload();
+                    } else {
+                        alert('Gagal menghapus perangkat.');
+                        deleteBtn.innerHTML = originalText;
+                        deleteBtn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Terjadi kesalahan saat menghapus data.');
+                    deleteBtn.innerHTML = originalText;
+                    deleteBtn.disabled = false;
+                });
             }
         }
 
