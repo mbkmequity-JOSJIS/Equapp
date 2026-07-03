@@ -308,12 +308,18 @@
                             <p class="text-sm text-slate-200">Live Status</p>
                             <div class="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm text-slate-100">
                                 <div class="flex items-center gap-3">
-                                    <span class="relative flex h-3 w-3">
-                                        <span
-                                            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
-                                        <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-400"></span>
+                                    <span class="relative flex h-3 w-3" id="status-indicator">
+                                        @if($deviceStatus === 'online')
+                                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 ping-anim"></span>
+                                            <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-400 dot-color"></span>
+                                        @else
+                                            <span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-60 ping-anim hidden"></span>
+                                            <span class="relative inline-flex h-3 w-3 rounded-full bg-red-500 dot-color"></span>
+                                        @endif
                                     </span>
-                                    <span class="text-sm font-semibold">Sensor aktif dan siap dipantau</span>
+                                    <span class="text-sm font-semibold" id="report-status">
+                                        {{ $deviceStatus === 'online' ? 'Online - Siap dipantau' : 'Offline - Tidak aktif' }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -845,7 +851,36 @@
 
                 if (scoreValue && typeof data.condition_score !== 'undefined') scoreValue.textContent = data
                     .condition_score;
-                if (reportStatus && data.status) reportStatus.textContent = data.status;
+                if (reportStatus && data.status) {
+                    const isOnline = data.status === 'online';
+                    reportStatus.textContent = isOnline ? 'Online - Siap dipantau' : 'Offline - Tidak aktif';
+                    
+                    const indicator = document.getElementById('status-indicator');
+                    if(indicator) {
+                        const pingAnim = indicator.querySelector('.ping-anim');
+                        const dotColor = indicator.querySelector('.dot-color');
+                        
+                        if(isOnline) {
+                            if(pingAnim) {
+                                pingAnim.classList.remove('hidden', 'bg-red-500');
+                                pingAnim.classList.add('animate-ping', 'bg-emerald-400');
+                            }
+                            if(dotColor) {
+                                dotColor.classList.remove('bg-red-500');
+                                dotColor.classList.add('bg-emerald-400');
+                            }
+                        } else {
+                            if(pingAnim) {
+                                pingAnim.classList.remove('animate-ping', 'bg-emerald-400');
+                                pingAnim.classList.add('hidden', 'bg-red-500');
+                            }
+                            if(dotColor) {
+                                dotColor.classList.remove('bg-emerald-400');
+                                dotColor.classList.add('bg-red-500');
+                            }
+                        }
+                    }
+                }
                 if (reportScore && typeof data.condition_score !== 'undefined') reportScore.textContent = data
                     .condition_score;
 
