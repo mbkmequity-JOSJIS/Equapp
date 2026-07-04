@@ -410,8 +410,8 @@
                                 $displayLabel = 'Kecepatan Angin';
                             } elseif (str_contains($labelLower, 'pm25') || str_contains($labelLower, 'pm 25')) {
                                 $displayLabel = 'PM2.5';
-                            } elseif (str_contains($labelLower, 'temperatur') || str_contains($labelLower, 'suhu')) {
-                                $displayLabel = 'Temperatur';
+                            } elseif (str_contains($labelLower, 'temperature') || str_contains($labelLower, 'suhu')) {
+                                $displayLabel = 'Suhu';
                             } elseif (
                                 str_contains($labelLower, 'kekeruhan') ||
                                 str_contains($labelLower, 'turbidity')
@@ -505,6 +505,10 @@
                                 </button>
                             @elseif(strtolower($sensor['label']) === 'kekeruhan' || strtolower($sensor['label']) === 'turbidity')
                                 <button type="button" onclick="openCalibrationTurbidityModal('TurbidityOffset')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
+                                    <i class="fas fa-sliders-h"></i> Kalibrasi
+                                </button>
+                            @elseif(strtolower($sensor['label']) === 'suhu' || strtolower($sensor['label']) === 'temperatur' || strtolower($sensor['label']) === 'temperature')
+                                <button type="button" onclick="openCalibrationTempModal('TempOffset')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
                                     <i class="fas fa-sliders-h"></i> Kalibrasi
                                 </button>
                             @endif
@@ -1316,6 +1320,78 @@
                 btn.disabled = false;
             }
         }
+
+        // Calibration Temperature Modal functions
+        let currentCalibrationFieldTemp = '';
+
+        function openCalibrationTempModal(field) {
+            currentCalibrationFieldTemp = field;
+            document.getElementById('calibration-modal-temp').classList.remove('hidden');
+            document.getElementById('calibration-modal-temp').classList.add('flex');
+            document.getElementById('input-offset-temp').value = '';
+        }
+
+        function closeCalibrationTempModal() {
+            document.getElementById('calibration-modal-temp').classList.add('hidden');
+            document.getElementById('calibration-modal-temp').classList.remove('flex');
+        }
+
+        async function submitCalibrationTemp(e) {
+            e.preventDefault();
+            const value = document.getElementById('input-offset-temp').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            if (!value) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`{{ route('api.device.calibration.field.update', ['device' => $device, 'id' => $deviceDataInfo['device_code']]) }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        field: currentCalibrationFieldTemp,
+                        value: value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCalibrationTempModal();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat menyimpan kalibrasi');
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message
+                });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
     </script>
 
     <!-- Modal Calibration DO -->
@@ -1384,6 +1460,23 @@
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationTurbidityModal()">Batal</button>
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Calibration Temperature -->
+    <div id="calibration-modal-temp" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Kalibrasi Sensor Suhu</h3>
+            <form id="calibration-form-temp" onsubmit="submitCalibrationTemp(event)">
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Temperature Offset</label>
+                    <input type="number" step="any" id="input-offset-temp" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: -1.5" required>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationTempModal()">Batal</button>
                     <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
                 </div>
             </form>
