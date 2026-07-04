@@ -153,6 +153,56 @@ class DeviceController extends Controller
         }
     }
 
+    public function updateCalibrationField(Request $request, $device, $device_code): JsonResponse
+    {
+        $request->validate([
+            'field' => 'required|string|max:100',
+            'value' => 'required|numeric',
+        ]);
+
+        try {
+            $this->firebaseService->updateCalibrationField($device, $device_code, $request->field, (float) $request->value);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai kalibrasi berhasil diperbarui.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memperbarui nilai kalibrasi',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateCalibrationFields(Request $request, $device, $device_code): JsonResponse
+    {
+        $request->validate([
+            'fields' => 'required|array',
+        ]);
+
+        try {
+            $formattedFields = [];
+            foreach ($request->fields as $key => $value) {
+                $formattedFields[$key] = (float) $value;
+            }
+
+            $this->firebaseService->updateCalibrationFields($device, $device_code, $formattedFields);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai kalibrasi berhasil diperbarui.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memperbarui nilai kalibrasi',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function resolveDeviceDetail($device, $device_code): array
     {
         if ($device == 'aquaviska') {
@@ -179,10 +229,11 @@ class DeviceController extends Controller
     private function prepareDeviceMonitoring(array $deviceDataMonitoring): array
     {
         $latest = $deviceDataMonitoring['latest'] ?? [];
+        $rawVoltage = $latest['raw_voltage'] ?? [];
         $sensors = [];
 
         foreach ($latest as $sensor => $value) {
-            if ($sensor === 'timestamp' || $sensor === 'condition_score' || $sensor === 'status') {
+            if ($sensor === 'timestamp' || $sensor === 'condition_score' || $sensor === 'status' || is_array($value)) {
                 continue;
             }
 
@@ -196,6 +247,7 @@ class DeviceController extends Controller
                 'unit' => $unit,
                 'status' => $status,
                 'pct' => $this->getSensorPct($sensor, (float) $value, $status),
+                'raw_voltage' => $rawVoltage[$sensor] ?? null,
             ];
         }
 
@@ -214,7 +266,7 @@ class DeviceController extends Controller
 
         return match (true) {
             str_contains($sensorLower, 'temperature') || str_contains($sensorLower, 'suhu') => '°C',
-            str_contains($sensorLower, 'ph') => '',
+            str_contains($sensorLower, 'ph') => 'pH',
             str_contains($sensorLower, 'turbidity') || str_contains($sensorLower, 'kekeruhan') => 'NTU',
             str_contains($sensorLower, 'do') => 'mg/L',
             str_contains($sensorLower, 'tds') => 'ppm',

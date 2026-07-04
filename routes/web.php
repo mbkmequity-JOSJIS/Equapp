@@ -57,6 +57,8 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/modul/device/{device}/{device_code}/history', [DeviceController::class, 'getHistory'])->name('device.history');
     Route::get('/modul/api/devices/{device}/{id}', [DeviceController::class, 'getDetail'])->name('api.device.detail');
     Route::post('/modul/api/devices/{device}/{id}/calibration', [DeviceController::class, 'storeCalibration'])->name('api.device.calibration.store');
+    Route::post('/modul/api/devices/{device}/{id}/calibration-field', [DeviceController::class, 'updateCalibrationField'])->name('api.device.calibration.field.update');
+    Route::post('/modul/api/devices/{device}/{id}/calibration-fields', [DeviceController::class, 'updateCalibrationFields'])->name('api.device.calibration.fields.update');
 
     // locations Routes
     Route::get('/modul/locations', [LocationController::class, 'index'])->name('locations');
