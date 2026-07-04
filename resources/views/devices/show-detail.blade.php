@@ -503,6 +503,10 @@
                                 <button type="button" onclick="openCalibrationTDSModal('kValueTDS')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
                                     <i class="fas fa-sliders-h"></i> Kalibrasi
                                 </button>
+                            @elseif(strtolower($sensor['label']) === 'kekeruhan' || strtolower($sensor['label']) === 'turbidity')
+                                <button type="button" onclick="openCalibrationTurbidityModal('TurbidityOffset')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
+                                    <i class="fas fa-sliders-h"></i> Kalibrasi
+                                </button>
                             @endif
                         </article>
                     @endforeach
@@ -1240,6 +1244,78 @@
                 btn.disabled = false;
             }
         }
+
+        // Calibration Turbidity Modal functions
+        let currentCalibrationFieldTurbidity = '';
+
+        function openCalibrationTurbidityModal(field) {
+            currentCalibrationFieldTurbidity = field;
+            document.getElementById('calibration-modal-turbidity').classList.remove('hidden');
+            document.getElementById('calibration-modal-turbidity').classList.add('flex');
+            document.getElementById('input-offset-turbidity').value = '';
+        }
+
+        function closeCalibrationTurbidityModal() {
+            document.getElementById('calibration-modal-turbidity').classList.add('hidden');
+            document.getElementById('calibration-modal-turbidity').classList.remove('flex');
+        }
+
+        async function submitCalibrationTurbidity(e) {
+            e.preventDefault();
+            const value = document.getElementById('input-offset-turbidity').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            if (!value) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`{{ route('api.device.calibration.field.update', ['device' => $device, 'id' => $deviceDataInfo['device_code']]) }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        field: currentCalibrationFieldTurbidity,
+                        value: value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCalibrationTurbidityModal();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat menyimpan kalibrasi');
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message
+                });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
     </script>
 
     <!-- Modal Calibration DO -->
@@ -1291,6 +1367,23 @@
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationTDSModal()">Batal</button>
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Calibration Turbidity -->
+    <div id="calibration-modal-turbidity" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Kalibrasi Sensor Kekeruhan</h3>
+            <form id="calibration-form-turbidity" onsubmit="submitCalibrationTurbidity(event)">
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Turbidity Offset</label>
+                    <input type="number" step="any" id="input-offset-turbidity" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: 0.5" required>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationTurbidityModal()">Batal</button>
                     <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
                 </div>
             </form>
