@@ -182,7 +182,7 @@ class DeviceController extends Controller
         $sensors = [];
 
         foreach ($latest as $sensor => $value) {
-            if ($sensor === 'timestamp' || $sensor === 'condition_score' || $sensor === 'status') {
+            if ($sensor === 'timestamp' || $sensor === 'condition_score' || $sensor === 'status' || is_array($value)) {
                 continue;
             }
 
