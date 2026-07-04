@@ -179,6 +179,7 @@ class DeviceController extends Controller
     private function prepareDeviceMonitoring(array $deviceDataMonitoring): array
     {
         $latest = $deviceDataMonitoring['latest'] ?? [];
+        $rawVoltage = $latest['raw_voltage'] ?? [];
         $sensors = [];
 
         foreach ($latest as $sensor => $value) {
@@ -196,6 +197,7 @@ class DeviceController extends Controller
                 'unit' => $unit,
                 'status' => $status,
                 'pct' => $this->getSensorPct($sensor, (float) $value, $status),
+                'raw_voltage' => $rawVoltage[$sensor] ?? null,
             ];
         }
 

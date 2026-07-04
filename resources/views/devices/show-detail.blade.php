@@ -483,6 +483,11 @@
                                         {{ $sensor['value'] }}
                                     </span>
                                     <span class="seven-seg-unit">{{ $unit }}</span>
+                                    @if(isset($sensor['raw_voltage']))
+                                        <span class="text-sm text-slate-400 ml-1 font-normal" style="font-family: inherit;">
+                                            ({{ $sensor['raw_voltage'] }} v)
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
 
