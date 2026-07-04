@@ -266,7 +266,7 @@ class DeviceController extends Controller
 
         return match (true) {
             str_contains($sensorLower, 'temperature') || str_contains($sensorLower, 'suhu') => '°C',
-            str_contains($sensorLower, 'ph') => '',
+            str_contains($sensorLower, 'ph') => 'pH',
             str_contains($sensorLower, 'turbidity') || str_contains($sensorLower, 'kekeruhan') => 'NTU',
             str_contains($sensorLower, 'do') => 'mg/L',
             str_contains($sensorLower, 'tds') => 'ppm',
