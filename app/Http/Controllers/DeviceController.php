@@ -153,6 +153,29 @@ class DeviceController extends Controller
         }
     }
 
+    public function updateCalibrationField(Request $request, $device, $device_code): JsonResponse
+    {
+        $request->validate([
+            'field' => 'required|string|max:100',
+            'value' => 'required|numeric',
+        ]);
+
+        try {
+            $this->firebaseService->updateCalibrationField($device, $device_code, $request->field, (float) $request->value);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai kalibrasi berhasil diperbarui.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memperbarui nilai kalibrasi',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function resolveDeviceDetail($device, $device_code): array
     {
         if ($device == 'aquaviska') {

@@ -109,6 +109,23 @@ class FirebaseService
             ->set($payload);
     }
 
+    public function updateCalibrationField(string $device, string $deviceCode, string $field, $value)
+    {
+        $path = match ($device) {
+            'aquaviska' => 'water_quality',
+            'climeet' => 'weather_station',
+            default => null,
+        };
+
+        if (! $path) {
+            throw new \InvalidArgumentException('Invalid device type.');
+        }
+
+        return $this->database
+            ->getReference("{$path}/{$deviceCode}/calibration/{$field}")
+            ->set($value);
+    }
+
     public function getHistoryData(string $device, string $deviceCode, string $sensorType): array
     {
         $path = match ($device) {
