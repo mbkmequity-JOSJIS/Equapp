@@ -76,9 +76,65 @@ class FirebaseService
         }
 
         try {
-            $data = $this->database->getReference($path)->getValue();
-            $dataDevices = $data['devices'] ?? [];
-            return $dataDevices;
+            $allData = $this->database->getReference($path)->getValue();
+            
+            if (!$allData || !isset($allData['devices'])) {
+                return [];
+            }
+            
+            $devicesMetadata = $allData['devices'];
+            $result = [];
+            
+            // Cari device metadata yang TIDAK deleted dan match dengan sensor data
+            foreach ($devicesMetadata as $metaKey => $metadata) {
+                if (!is_array($metadata)) continue;
+                
+                // Skip jika is_deleted = true (ini pasti dummy)
+                if (isset($metadata['is_deleted']) && $metadata['is_deleted']) {
+                    continue;
+                }
+                
+                // Skip preview/dummy device (device_01 - kita gunakan sebagai fallback saja)
+                if ($metaKey === 'device_01') {
+                    continue;
+                }
+                
+                // Skip jika device_code tidak ada
+                $deviceCode = $metadata['device_code'] ?? null;
+                if (!$deviceCode) {
+                    continue;
+                }
+                
+                // Check apakah sensor data ada di root level
+                if (!isset($allData[$deviceCode])) {
+                    continue;
+                }
+                
+                // Ini adalah device real - merge metadata dengan sensor data
+                $sensorData = $allData[$deviceCode];
+                
+                // Jika koordinat 0,0 (tidak valid), coba gunakan koordinat dari device_01 yang punya device_code sama
+                $location = $metadata['location'] ?? [];
+                if (
+                    (!isset($location['latitude']) || $location['latitude'] == 0) &&
+                    (!isset($location['longitude']) || $location['longitude'] == 0) &&
+                    isset($devicesMetadata['device_01']) &&
+                    isset($devicesMetadata['device_01']['location'])
+                ) {
+                    $location = array_merge($location, $devicesMetadata['device_01']['location']);
+                }
+                
+                $merged = array_merge($metadata, [
+                    'sensor_data' => $sensorData,
+                    'location' => $location,  // Update dengan koordinat fallback jika ada
+                    '_device_key' => $metaKey  // Simpan key untuk reference
+                ]);
+                
+                $result[$metaKey] = $merged;
+            }
+            
+            return $result;
+            
         } catch (\Exception $e) {
             Log::error("FirebaseService Error fetching data for device '{$device}': " . $e->getMessage());
             return [];

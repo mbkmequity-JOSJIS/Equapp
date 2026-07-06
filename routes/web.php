@@ -58,6 +58,9 @@ Route::middleware(['guest'])->group(function () {
     // locations Routes
     Route::get('/modul/locations', [LocationController::class, 'index'])->name('locations');
     Route::get('/modul/locations/{id}', [LocationController::class, 'show'])->name('location.detail');
+    Route::get('/api/locations', [LocationController::class, 'getLocations'])->name('api.locations');
+    Route::get('/api/locations/{id}', [LocationController::class, 'getLocation'])->name('api.location.detail');
+    Route::get('/api/debug/firebase-locations', [LocationController::class, 'debugFirebaseData'])->name('api.debug.firebase.locations');
 
     // dashboard
     Route::get('/modul/{module}', [DashboardController::class, 'dashboard'])->name('module');

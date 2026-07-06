@@ -342,81 +342,47 @@
                                     : ($sensor['status'] === 'waspada'
                                         ? 'medium'
                                         : 'bad');
-
-                            // Determine icon (keep previous mapping)
                             $icon = match (true) {
-                                str_contains(strtolower($sensor['label']), 'temperatur') || str_contains(strtolower($sensor['label']), 'suhu') => 'thermometer-half',
+                                str_contains(strtolower($sensor['label']), 'temperatur') ||
+                                    str_contains(strtolower($sensor['label']), 'suhu')
+                                    => 'thermometer-half',
                                 str_contains($sensor['label'], 'pH') => 'flask',
-                                str_contains(strtolower($sensor['label']), 'turbidity') || str_contains(strtolower($sensor['label']), 'kekeruhan') => 'eye',
-                                str_contains(strtolower($sensor['label']), 'dissolved oxygen') || str_contains(strtolower($sensor['label']), 'do') => 'wind',
+                                str_contains(strtolower($sensor['label']), 'turbidity') ||
+                                    str_contains(strtolower($sensor['label']), 'kekeruhan')
+                                    => 'eye',
+                                str_contains(strtolower($sensor['label']), 'dissolved oxygen') ||
+                                    str_contains(strtolower($sensor['label']), 'do')
+                                    => 'wind',
                                 str_contains(strtolower($sensor['label']), 'total dissolved solids') => 'tint',
-                                str_contains(strtolower($sensor['label']), 'kelembapan') || str_contains(strtolower($sensor['label']), 'kelembaban') => 'droplet',
-                                str_contains(strtolower($sensor['label']), 'tvoc') || str_contains(strtolower($sensor['label']), 'co2') => 'cloud',
+                                str_contains(strtolower($sensor['label']), 'kelembapan') => 'droplet',
+                                str_contains(strtolower($sensor['label']), 'tvoc') ||
+                                    str_contains(strtolower($sensor['label']), 'co2')
+                                    => 'cloud',
                                 str_contains(strtolower($sensor['label']), 'uv') => 'sun',
-                                str_contains(strtolower($sensor['label']), 'pm25') || str_contains(strtolower($sensor['label']), 'pm 25') => 'smog',
-                                str_contains(strtolower($sensor['label']), 'hujan') || str_contains(strtolower($sensor['label']), 'rain') => 'cloud-rain',
                                 default => 'microchip',
                             };
-
-                            // Translate label to Indonesian (display only)
-                            $labelLower = strtolower($sensor['label']);
-                            if (str_contains($labelLower, 'intensitas') || str_contains($labelLower, 'hujan') || str_contains($labelLower, 'curah')) {
-                                $displayLabel = 'Intensitas Hujan';
-                            } elseif (str_contains($labelLower, 'kelembab') || str_contains($labelLower, 'kelembapan') || str_contains($labelLower, 'humidity')) {
-                                $displayLabel = 'Kelembaban';
-                            } elseif (str_contains($labelLower, 'wind') || str_contains($labelLower, 'kecepatan') || str_contains($labelLower, 'angin') || str_contains($labelLower, 'wind speed')) {
-                                $displayLabel = 'Kecepatan Angin';
-                            } elseif (str_contains($labelLower, 'pm25') || str_contains($labelLower, 'pm 25')) {
-                                $displayLabel = 'PM2.5';
-                            } elseif (str_contains($labelLower, 'temperatur') || str_contains($labelLower, 'suhu')) {
-                                $displayLabel = 'Temperatur';
-                            } elseif (str_contains($labelLower, 'kekeruhan') || str_contains($labelLower, 'turbidity')) {
-                                $displayLabel = 'Kekeruhan';
-                            } elseif (str_contains($labelLower, 'dissolved oxygen') || str_contains($labelLower, 'do')) {
-                                $displayLabel = 'Oksigen Terlarut';
-                            } elseif (str_contains($labelLower, 'total dissolved solids') || str_contains($labelLower, 'tds')) {
-                                $displayLabel = 'TDS';
-                            } elseif (str_contains($labelLower, 'uv')) {
-                                $displayLabel = 'Indeks UV';
-                            } elseif (str_contains($labelLower, 'ph')) {
-                                $displayLabel = 'pH';
-                            } else {
-                                // fallback: title case the original label
-                                $displayLabel = ucwords(str_replace(['_', '-'], ' ', $sensor['label']));
-                            }
-
-                            // Determine unit defaults if empty
-                            $unit = trim((string)($sensor['unit'] ?? ''));
-                            if ($unit === '') {
-                                if (str_contains($labelLower, 'intensitas') || str_contains($labelLower, 'hujan') || str_contains($labelLower, 'curah')) {
-                                    $unit = 'mm/day';
-                                } elseif (str_contains($labelLower, 'kelembab') || str_contains($labelLower, 'kelembapan')) {
-                                    $unit = '%RH';
-                                } elseif (str_contains($labelLower, 'pm25') || str_contains($labelLower, 'pm 25')) {
-                                    $unit = 'µg/m³';
-                                } elseif (str_contains($labelLower, 'wind') || str_contains($labelLower, 'angin') || str_contains($labelLower, 'kecepatan')) {
-                                    $unit = 'm/s';
-                                }
-                            }
                         @endphp
-
                         <article
                             class="sensor-card overflow-hidden rounded-2xl border border-slate-200 p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between relative bg-white"
                             data-sensor-label="{{ $sensor['label'] }}">
-                            <span class="sensor-status {{ $sensorTone }}">{{ ucfirst($sensor['status']) }}</span>
+                            <span
+                                class="sensor-status {{ $sensorTone }}">
+                                {{ ucfirst($sensor['status']) }}
+                            </span>
                             <div class="flex items-center gap-4">
-                                <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-xl text-slate-700">
+                                <div
+                                    class="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-xl text-slate-700">
                                     <i class="fas fa-{{ $icon }}"></i>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-base font-semibold text-slate-900">{{ $displayLabel }}</p>
+                                    <p class="text-base font-semibold text-slate-900">{{ $sensor['label'] }}</p>
                                 </div>
                             </div>
 
                             <div class="text-center w-full mt-6">
                                 <div class="sensor-display">
                                     <span class="sensor-value seven-seg-value">{{ $sensor['value'] }}</span>
-                                    <span class="seven-seg-unit">{{ $unit }}</span>
+                                    <span class="seven-seg-unit">{{ $sensor['unit'] }}</span>
                                 </div>
                             </div>
 
