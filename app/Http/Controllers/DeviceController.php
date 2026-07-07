@@ -427,30 +427,49 @@ class DeviceController extends Controller
     private function buildFallbackChartSeries(string $deviceType): array
     {
         if ($deviceType === 'AQUAVISKA') {
-            $baseSeries = ['label' => 'pH', 'data' => [7.0, 7.1, 7.1, 7.2, 7.2, 7.3, 7.2], 'unit' => ''];
+            $sensors = ['ph', 'do', 'tds', 'turbidity', 'temperature'];
+            $sampleData = [
+                'ph' => [7.0, 7.1, 7.1, 7.2, 7.2, 7.3, 7.2],
+                'do' => [5.2, 5.3, 5.4, 5.5, 5.5, 5.6, 5.5],
+                'tds' => [250, 260, 270, 280, 290, 300, 295],
+                'turbidity' => [5, 6, 7, 8, 9, 10, 9],
+                'temperature' => [28.0, 28.2, 28.4, 28.5, 28.6, 28.7, 28.5],
+            ];
         } else {
-            $baseSeries = ['label' => 'Temperature', 'data' => [28.0, 28.4, 28.8, 29.1, 29.4, 29.7, 29.5], 'unit' => '°C'];
+            $sensors = ['temperature', 'humidity', 'pm25', 'uv'];
+            $sampleData = [
+                'temperature' => [28.0, 28.4, 28.8, 29.1, 29.4, 29.7, 29.5],
+                'humidity' => [65, 68, 70, 72, 74, 76, 75],
+                'pm25' => [45, 48, 50, 52, 55, 58, 56],
+                'uv' => [5.2, 5.5, 5.8, 6.1, 6.4, 6.7, 6.5],
+            ];
         }
 
-        $sensorKey = $deviceType === 'AQUAVISKA' ? 'ph' : 'temperature';
-        $fallbackSeries = [
-            'label' => $baseSeries['label'],
-            'data' => $baseSeries['data'],
-            'unit' => $baseSeries['unit'],
-            'borderColor' => $this->getSensorChartColor($sensorKey)['border'],
-            'backgroundColor' => $this->getSensorChartColor($sensorKey)['background'],
-        ];
+        $labels = ['-6j', '-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'];
+        $ranges = ['6', '12', '24'];
+        $result = [];
+        $chartSeries = [];
+
+        foreach ($ranges as $range) {
+            foreach ($sensors as $sensor) {
+                $color = $this->getSensorChartColor($sensor);
+                $fallbackSeries = [
+                    'label' => $this->getSensorLabel($sensor),
+                    'data' => $sampleData[$sensor] ?? [0, 0, 0, 0, 0, 0, 0],
+                    'unit' => $this->getSensorUnit($sensor),
+                    'borderColor' => $color['border'],
+                    'backgroundColor' => $color['background'],
+                ];
+                $chartSeries[$range][$sensor] = $fallbackSeries;
+            }
+        }
 
         return [
-            '6' => ['labels' => ['-6j', '-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'datasets' => [$baseSeries]],
-            '12' => ['labels' => ['-12j', '-10j', '-8j', '-6j', '-4j', '-2j', 'Sekarang'], 'datasets' => [$baseSeries]],
-            '24' => ['labels' => ['-24j', '-20j', '-16j', '-12j', '-8j', '-4j', 'Sekarang'], 'datasets' => [$baseSeries]],
-            'sensor_keys' => [$sensorKey],
-            'chart_series' => [
-                '6' => [$sensorKey => $fallbackSeries],
-                '12' => [$sensorKey => $fallbackSeries],
-                '24' => [$sensorKey => $fallbackSeries],
-            ],
+            '6' => ['labels' => $labels, 'datasets' => []],
+            '12' => ['labels' => ['-12j', '-10j', '-8j', '-6j', '-4j', '-2j', 'Sekarang'], 'datasets' => []],
+            '24' => ['labels' => ['-24j', '-20j', '-16j', '-12j', '-8j', '-4j', 'Sekarang'], 'datasets' => []],
+            'sensor_keys' => $sensors,
+            'chart_series' => $chartSeries,
         ];
     }
 
