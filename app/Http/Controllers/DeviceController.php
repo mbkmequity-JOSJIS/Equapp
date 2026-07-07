@@ -242,6 +242,7 @@ class DeviceController extends Controller
             $unit = $this->getSensorUnit($sensor);
 
             $sensors[] = [
+                'key' => $sensor,
                 'label' => $label,
                 'value' => $value,
                 'unit' => $unit,
@@ -334,13 +335,13 @@ class DeviceController extends Controller
 
         usort($normalized, fn($a, $b) => $a['timestamp']->timestamp - $b['timestamp']->timestamp);
 
-        $sensorKeys = array_unique($allSensorKeys);
+        $sensorKeys = array_values(array_unique($allSensorKeys));
 
         // Pilih sensor utama untuk chart
         $prioritySensors = ['ph', 'do', 'temperature', 'tds', 'turbidity'];
         $primarySensor = null;
         foreach ($prioritySensors as $priority) {
-            if (in_array($priority, $sensorKeys)) {
+            if (in_array($priority, $sensorKeys, true)) {
                 $primarySensor = $priority;
                 break;
             }
@@ -352,6 +353,7 @@ class DeviceController extends Controller
 
         $ranges = ['6', '12', '24'];
         $result = [];
+        $chartSeries = [];
 
         foreach ($ranges as $range) {
             $cutoff = now()->subHours((int) $range);
@@ -378,9 +380,48 @@ class DeviceController extends Controller
                     'unit' => $this->getSensorUnit($primarySensor),
                 ]],
             ];
+
+            foreach ($sensorKeys as $sensorKey) {
+                $seriesData = [];
+                foreach ($window as $row) {
+                    $seriesData[] = isset($row['values'][$sensorKey]) ? round($row['values'][$sensorKey], 2) : null;
+                }
+
+                $color = $this->getSensorChartColor($sensorKey);
+                $chartSeries[$range][$sensorKey] = [
+                    'label' => $this->getSensorLabel($sensorKey),
+                    'data' => $seriesData,
+                    'unit' => $this->getSensorUnit($sensorKey),
+                    'borderColor' => $color['border'],
+                    'backgroundColor' => $color['background'],
+                ];
+            }
         }
 
-        return $result;
+        return array_merge($result, [
+            'sensor_keys' => $sensorKeys,
+            'chart_series' => $chartSeries,
+        ]);
+    }
+
+    private function getSensorChartColor(string $sensor): array
+    {
+        $sensorLower = strtolower($sensor);
+
+        return match (true) {
+            str_contains($sensorLower, 'ph') => ['border' => '#ec4899', 'background' => 'rgba(236, 72, 153, 0.12)'],
+            str_contains($sensorLower, 'do') => ['border' => '#0ea5e9', 'background' => 'rgba(14, 165, 233, 0.14)'],
+            str_contains($sensorLower, 'temperature') || str_contains($sensorLower, 'suhu') => ['border' => '#f97316', 'background' => 'rgba(249, 115, 22, 0.13)'],
+            str_contains($sensorLower, 'tds') => ['border' => '#14b8a6', 'background' => 'rgba(20, 184, 166, 0.14)'],
+            str_contains($sensorLower, 'turbidity') || str_contains($sensorLower, 'kekeruhan') => ['border' => '#8b5cf6', 'background' => 'rgba(139, 92, 246, 0.14)'],
+            str_contains($sensorLower, 'humidity') || str_contains($sensorLower, 'kelembab') => ['border' => '#22c55e', 'background' => 'rgba(34, 197, 94, 0.14)'],
+            str_contains($sensorLower, 'pm25') || str_contains($sensorLower, 'pm 25') => ['border' => '#64748b', 'background' => 'rgba(100, 116, 139, 0.14)'],
+            str_contains($sensorLower, 'uv') => ['border' => '#facc15', 'background' => 'rgba(250, 204, 21, 0.14)'],
+            str_contains($sensorLower, 'co2') => ['border' => '#a3e635', 'background' => 'rgba(163, 230, 53, 0.14)'],
+            str_contains($sensorLower, 'angin') || str_contains($sensorLower, 'wind') => ['border' => '#38bdf8', 'background' => 'rgba(56, 189, 248, 0.14)'],
+            str_contains($sensorLower, 'curah') || str_contains($sensorLower, 'rain') => ['border' => '#0d9488', 'background' => 'rgba(13, 148, 136, 0.14)'],
+            default => ['border' => '#0ea5e9', 'background' => 'rgba(14, 165, 233, 0.12)'],
+        };
     }
 
     private function buildFallbackChartSeries(string $deviceType): array
@@ -391,10 +432,25 @@ class DeviceController extends Controller
             $baseSeries = ['label' => 'Temperature', 'data' => [28.0, 28.4, 28.8, 29.1, 29.4, 29.7, 29.5], 'unit' => '°C'];
         }
 
+        $sensorKey = $deviceType === 'AQUAVISKA' ? 'ph' : 'temperature';
+        $fallbackSeries = [
+            'label' => $baseSeries['label'],
+            'data' => $baseSeries['data'],
+            'unit' => $baseSeries['unit'],
+            'borderColor' => $this->getSensorChartColor($sensorKey)['border'],
+            'backgroundColor' => $this->getSensorChartColor($sensorKey)['background'],
+        ];
+
         return [
             '6' => ['labels' => ['-6j', '-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'datasets' => [$baseSeries]],
             '12' => ['labels' => ['-12j', '-10j', '-8j', '-6j', '-4j', '-2j', 'Sekarang'], 'datasets' => [$baseSeries]],
             '24' => ['labels' => ['-24j', '-20j', '-16j', '-12j', '-8j', '-4j', 'Sekarang'], 'datasets' => [$baseSeries]],
+            'sensor_keys' => [$sensorKey],
+            'chart_series' => [
+                '6' => [$sensorKey => $fallbackSeries],
+                '12' => [$sensorKey => $fallbackSeries],
+                '24' => [$sensorKey => $fallbackSeries],
+            ],
         ];
     }
 
