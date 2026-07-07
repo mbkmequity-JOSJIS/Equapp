@@ -353,8 +353,6 @@
                                     : ($sensor['status'] === 'waspada'
                                         ? 'medium'
                                         : 'bad');
-
-                            // Determine icon (keep previous mapping)
                             $icon = match (true) {
                                 str_contains(strtolower($sensor['label']), 'temperatur') ||
                                     str_contains(strtolower($sensor['label']), 'suhu')
@@ -458,18 +456,20 @@
                                 }
                             }
                         @endphp
-
                         <article
                             class="sensor-card overflow-hidden rounded-2xl border border-slate-200 p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between relative bg-white"
                             data-sensor-label="{{ $sensor['label'] }}">
-                            <span class="sensor-status {{ $sensorTone }}">{{ ucfirst($sensor['status']) }}</span>
+                            <span
+                                class="sensor-status {{ $sensorTone }}">
+                                {{ ucfirst($sensor['status']) }}
+                            </span>
                             <div class="flex items-center gap-4">
                                 <div
                                     class="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-xl text-slate-700">
                                     <i class="fas fa-{{ $icon }}"></i>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-base font-semibold text-slate-900">{{ $displayLabel }}</p>
+                                    <p class="text-base font-semibold text-slate-900">{{ $sensor['label'] }}</p>
                                 </div>
                             </div>
 

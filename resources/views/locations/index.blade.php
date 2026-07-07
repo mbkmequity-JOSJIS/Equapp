@@ -353,77 +353,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 
     <script>
-        // Data devices (simulasi - nanti bisa diganti dengan data dari controller)
-        let devicesData = [
-            {
-                id: 1,
-                device_code: 'AQV-001',
-                device_name: 'Sensor Air Cisadane',
-                type: 'aquaviska',
-                status: 'active',
-                condition_score: 85,
-                location: {
-                    name: 'Cisadane',
-                    address: 'Jalan Cisadane, Tangerang',
-                    city: 'Tangerang',
-                    latitude: -6.2088,
-                    longitude: 106.8456,
-                    province: 'Banten'
-                },
-                latest_data: { ph: 7.2, tds: 120, temperature: 28 }
-            },
-            {
-                id: 2,
-                device_code: 'AQV-002',
-                device_name: 'Sensor Air Bengawan Solo',
-                type: 'aquaviska',
-                status: 'warning',
-                condition_score: 62,
-                location: {
-                    name: 'Bengawan Solo',
-                    address: 'Surakarta',
-                    city: 'Surakarta',
-                    latitude: -7.557,
-                    longitude: 110.844,
-                    province: 'Jawa Tengah'
-                },
-                latest_data: { ph: 6.8, tds: 350, temperature: 29 }
-            },
-            {
-                id: 3,
-                device_code: 'CLM-001',
-                device_name: 'Sensor Udara Jakarta Pusat',
-                type: 'climeet',
-                status: 'active',
-                condition_score: 78,
-                location: {
-                    name: 'Jakarta Pusat',
-                    address: 'Gambir, Jakarta Pusat',
-                    city: 'Jakarta',
-                    latitude: -6.1754,
-                    longitude: 106.8272,
-                    province: 'DKI Jakarta'
-                },
-                latest_data: { pm25: 45, pm10: 78, temperature: 30 }
-            },
-            {
-                id: 4,
-                device_code: 'CLM-002',
-                device_name: 'Sensor Udara Bandung',
-                type: 'climeet',
-                status: 'critical',
-                condition_score: 45,
-                location: {
-                    name: 'Bandung',
-                    address: 'Jl. Merdeka, Bandung',
-                    city: 'Bandung',
-                    latitude: -6.9175,
-                    longitude: 107.6191,
-                    province: 'Jawa Barat'
-                },
-                latest_data: { pm25: 95, pm10: 120, temperature: 27 }
-            }
-        ];
+        // Data devices dari Firebase (via Laravel Controller)
+        let devicesData = {!! json_encode($devices ?? []) !!};
         
         let map;
         let markers = [];
