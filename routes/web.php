@@ -38,6 +38,9 @@ Route::post('/login', [AuthController::class, 'authenticate'])->name('login.auth
 Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('index');
+        Route::post('/update-firebase-status', [AdminController::class, 'updateFirebaseStatus'])->name('update.firebase.status');
+        Route::post('/save-firebase-device', [AdminController::class, 'saveFirebaseDevice'])->name('save.firebase.device');
+        Route::post('/delete-firebase-device', [AdminController::class, 'deleteFirebaseDevice'])->name('delete.firebase.device');
         Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     });
 });
@@ -54,6 +57,8 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/modul/device/{device}/{device_code}/history', [DeviceController::class, 'getHistory'])->name('device.history');
     Route::get('/modul/api/devices/{device}/{id}', [DeviceController::class, 'getDetail'])->name('api.device.detail');
     Route::post('/modul/api/devices/{device}/{id}/calibration', [DeviceController::class, 'storeCalibration'])->name('api.device.calibration.store');
+    Route::post('/modul/api/devices/{device}/{id}/calibration-field', [DeviceController::class, 'updateCalibrationField'])->name('api.device.calibration.field.update');
+    Route::post('/modul/api/devices/{device}/{id}/calibration-fields', [DeviceController::class, 'updateCalibrationFields'])->name('api.device.calibration.fields.update');
 
     // locations Routes
     Route::get('/modul/locations', [LocationController::class, 'index'])->name('locations');

@@ -9,6 +9,11 @@
             position: relative;
         }
 
+        .sensor-card.is-updated {
+            border-color: rgba(34, 197, 94, 0.75) !important;
+            box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.28), 0 0 24px rgba(34, 197, 94, 0.2), 0 12px 24px -12px rgba(34, 197, 94, 0.45) !important;
+        }
+
         .sensor-status {
             display: inline-flex;
             align-items: center;
@@ -47,7 +52,7 @@
 
         .seven-seg-value {
             font-family: 'Orbitron', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-            font-size: 2.45rem;
+            font-size: 3rem;
             line-height: 1;
             letter-spacing: 0;
             font-weight: 500;
@@ -78,6 +83,12 @@
             display: none;
         }
 
+        .sensor-card canvas {
+            width: 100% !important;
+            height: 140px !important;
+            max-height: 140px;
+        }
+
         /* Modal Custom Styles */
         .modal-transition {
             transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -151,80 +162,81 @@
                 transform: scale(1.5);
                 opacity: 0;
             }
-        /* Modal Custom Styles */
-        .modal-transition {
-            transition: opacity 0.2s ease, visibility 0.2s ease;
-        }
 
-        .modal-transition.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .modal-transition:not(.hidden) {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* AI Recommendations Styles */
-        .ai-card {
-            transition: all 0.3s ease;
-        }
-
-        .ai-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .progress-ring {
-            transition: stroke-dashoffset 0.5s ease;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-
-        /* Animasi bounce untuk floating button */
-        @keyframes soft-bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
+            /* Modal Custom Styles */
+            .modal-transition {
+                transition: opacity 0.2s ease, visibility 0.2s ease;
             }
 
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        .whatsapp-float {
-            animation: soft-bounce 2s ease-in-out infinite;
-        }
-
-        /* Pulse ring effect */
-        .pulse-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background-color: rgba(16, 185, 129, 0.4);
-            animation: pulse-ring 1.5s ease-out infinite;
-            pointer-events: none;
-        }
-
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(1);
-                opacity: 0.6;
-            }
-
-            100% {
-                transform: scale(1.5);
+            .modal-transition.hidden {
                 opacity: 0;
+                visibility: hidden;
             }
-        }
+
+            .modal-transition:not(.hidden) {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            /* AI Recommendations Styles */
+            .ai-card {
+                transition: all 0.3s ease;
+            }
+
+            .ai-card:hover {
+                transform: translateY(-2px);
+            }
+
+            .progress-ring {
+                transition: stroke-dashoffset 0.5s ease;
+            }
+
+            /* Chart Container */
+            .chart-container {
+                position: relative;
+                height: 300px;
+                width: 100%;
+            }
+
+            /* Animasi bounce untuk floating button */
+            @keyframes soft-bounce {
+
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            .whatsapp-float {
+                animation: soft-bounce 2s ease-in-out infinite;
+            }
+
+            /* Pulse ring effect */
+            .pulse-ring {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background-color: rgba(16, 185, 129, 0.4);
+                animation: pulse-ring 1.5s ease-out infinite;
+                pointer-events: none;
+            }
+
+            @keyframes pulse-ring {
+                0% {
+                    transform: scale(1);
+                    opacity: 0.6;
+                }
+
+                100% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+            }
     </style>
 @endsection
 
@@ -237,7 +249,10 @@
         $deviceStatus = $deviceDataInfo['status'] ?? 'normal';
         $statusTone = $deviceStatus === 'normal' ? 'good' : ($deviceStatus === 'waspada' ? 'medium' : 'bad');
         $excludedSensorLabels = ['tekanan', 'totalhujan', 'rainfall', 'curah', 'pressure'];
-        $sensorCards = array_filter($deviceDataMonitoring['sensors'] ?? [], fn($sensor) => ! in_array(strtolower(str_replace(' ', '', $sensor['label'])), $excludedSensorLabels, true));
+        $sensorCards = array_filter(
+            $deviceDataMonitoring['sensors'] ?? [],
+            fn($sensor) => !in_array(strtolower(str_replace(' ', '', $sensor['label'])), $excludedSensorLabels, true),
+        );
         $detailApi = route('api.device.detail', [
             'device' => $device,
             'id' => $deviceDataInfo['device_code'] ?? request()->route('id'),
@@ -285,26 +300,22 @@
                     </div>
 
                     <div class="flex flex-col justify-end items-end gap-4">
-                        <div class="rounded-3xl border border-white/15 bg-white/90 p-5 shadow-xl backdrop-blur"
-                            id="score-badge">
-                            <p class="text-sm font-medium text-slate-500">Skor Kondisi</p>
-                            <div class="mt-2 flex items-end gap-2">
-                                <span class="text-5xl font-black tracking-tight text-slate-900"
-                                    id="condition-score">{{ $deviceScore }}</span>
-                                <span class="pb-1 text-lg font-semibold text-slate-500">/100</span>
-                            </div>
-                        </div>
-
                         <div class="rounded-3xl border border-white/15 bg-white/10 p-5 text-white backdrop-blur">
                             <p class="text-sm text-slate-200">Live Status</p>
                             <div class="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm text-slate-100">
                                 <div class="flex items-center gap-3">
-                                    <span class="relative flex h-3 w-3">
-                                        <span
-                                            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
-                                        <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-400"></span>
+                                    <span class="relative flex h-3 w-3" id="status-indicator">
+                                        @if($deviceStatus === 'online')
+                                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 ping-anim"></span>
+                                            <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-400 dot-color"></span>
+                                        @else
+                                            <span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-60 ping-anim hidden"></span>
+                                            <span class="relative inline-flex h-3 w-3 rounded-full bg-red-500 dot-color"></span>
+                                        @endif
                                     </span>
-                                    <span class="text-sm font-semibold">Sensor aktif dan siap dipantau</span>
+                                    <span class="text-sm font-semibold" id="report-status">
+                                        {{ $deviceStatus === 'online' ? 'Online - Siap dipantau' : 'Offline - Tidak aktif' }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -354,13 +365,96 @@
                                     str_contains(strtolower($sensor['label']), 'do')
                                     => 'wind',
                                 str_contains(strtolower($sensor['label']), 'total dissolved solids') => 'tint',
-                                str_contains(strtolower($sensor['label']), 'kelembapan') => 'droplet',
+                                str_contains(strtolower($sensor['label']), 'kelembapan') ||
+                                    str_contains(strtolower($sensor['label']), 'kelembaban')
+                                    => 'droplet',
                                 str_contains(strtolower($sensor['label']), 'tvoc') ||
                                     str_contains(strtolower($sensor['label']), 'co2')
                                     => 'cloud',
                                 str_contains(strtolower($sensor['label']), 'uv') => 'sun',
+                                str_contains(strtolower($sensor['label']), 'pm25') ||
+                                    str_contains(strtolower($sensor['label']), 'pm 25')
+                                    => 'smog',
+                                str_contains(strtolower($sensor['label']), 'hujan') ||
+                                    str_contains(strtolower($sensor['label']), 'rain')
+                                    => 'cloud-rain',
                                 default => 'microchip',
                             };
+
+                            // Translate label to Indonesian (display only)
+                            $labelLower = strtolower($sensor['label']);
+                            if (
+                                str_contains($labelLower, 'intensitas') ||
+                                str_contains($labelLower, 'hujan') ||
+                                str_contains($labelLower, 'curah')
+                            ) {
+                                $displayLabel = 'Intensitas Hujan';
+                            } elseif (
+                                str_contains($labelLower, 'kelembab') ||
+                                str_contains($labelLower, 'kelembapan') ||
+                                str_contains($labelLower, 'humidity')
+                            ) {
+                                $displayLabel = 'Kelembaban';
+                            } elseif (
+                                str_contains($labelLower, 'wind') ||
+                                str_contains($labelLower, 'kecepatan') ||
+                                str_contains($labelLower, 'angin') ||
+                                str_contains($labelLower, 'wind speed')
+                            ) {
+                                $displayLabel = 'Kecepatan Angin';
+                            } elseif (str_contains($labelLower, 'pm25') || str_contains($labelLower, 'pm 25')) {
+                                $displayLabel = 'PM2.5';
+                            } elseif (str_contains($labelLower, 'temperature') || str_contains($labelLower, 'suhu')) {
+                                $displayLabel = 'Suhu';
+                            } elseif (
+                                str_contains($labelLower, 'kekeruhan') ||
+                                str_contains($labelLower, 'turbidity')
+                            ) {
+                                $displayLabel = 'Kekeruhan';
+                            } elseif (
+                                str_contains($labelLower, 'dissolved oxygen') ||
+                                str_contains($labelLower, 'do')
+                            ) {
+                                $displayLabel = 'Oksigen Terlarut';
+                            } elseif (
+                                str_contains($labelLower, 'total dissolved solids') ||
+                                str_contains($labelLower, 'tds')
+                            ) {
+                                $displayLabel = 'TDS';
+                            } elseif (str_contains($labelLower, 'uv')) {
+                                $displayLabel = 'Indeks UV';
+                            } elseif (str_contains($labelLower, 'ph')) {
+                                $displayLabel = 'pH';
+                            } else {
+                                // fallback: title case the original label
+                                $displayLabel = ucwords(str_replace(['_', '-'], ' ', $sensor['label']));
+                            }
+
+
+                            // Determine unit defaults if empty
+                            $unit = trim((string) ($sensor['unit'] ?? ''));
+                            if ($unit === '') {
+                                if (
+                                    str_contains($labelLower, 'intensitas') ||
+                                    str_contains($labelLower, 'hujan') ||
+                                    str_contains($labelLower, 'curah')
+                                ) {
+                                    $unit = 'mm/day';
+                                } elseif (
+                                    str_contains($labelLower, 'kelembab') ||
+                                    str_contains($labelLower, 'kelembapan')
+                                ) {
+                                    $unit = '%RH';
+                                } elseif (str_contains($labelLower, 'pm25') || str_contains($labelLower, 'pm 25')) {
+                                    $unit = 'µg/m³';
+                                } elseif (
+                                    str_contains($labelLower, 'wind') ||
+                                    str_contains($labelLower, 'angin') ||
+                                    str_contains($labelLower, 'kecepatan')
+                                ) {
+                                    $unit = 'm/s';
+                                }
+                            }
                         @endphp
                         <article
                             class="sensor-card overflow-hidden rounded-2xl border border-slate-200 p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between relative bg-white"
@@ -381,57 +475,53 @@
 
                             <div class="text-center w-full mt-6">
                                 <div class="sensor-display">
-                                    <span class="sensor-value seven-seg-value">{{ $sensor['value'] }}</span>
-                                    <span class="seven-seg-unit">{{ $sensor['unit'] }}</span>
+                                    <span class="sensor-value seven-seg-value text-[2rem]" data-current-value="{{ $sensor['value'] }}">
+                                        {{ $sensor['value'] }}
+                                    </span>
+                                    <span class="seven-seg-unit">{{ $unit }}</span>
+                                    @if(isset($sensor['raw_voltage']))
+                                        <span class="text-sm text-slate-400 ml-1 font-normal" style="font-family: inherit;">
+                                            ({{ $sensor['raw_voltage'] }} v)
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
 
+                            <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                                <div class="flex items-center justify-between mb-2 text-sm font-semibold text-slate-700">
+                                    <span>Tren {{ $sensor['label'] }}</span>
+                                    <span class="text-xs text-slate-500">24 jam</span>
+                                </div>
+                                <div class="chart-card">
+                                    <canvas data-sensor-key="{{ $sensor['key'] }}" class="sensor-mini-chart"></canvas>
+                                </div>
+                            </div>
+
+                            @if(strtolower($sensor['label']) === 'do' || strtolower($sensor['label']) === 'dissolved oxygen')
+                                <button type="button" onclick="openCalibrationDOModal('voltageDO_100')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
+                                    <i class="fas fa-sliders-h"></i> Kalibrasi
+                                </button>
+                            @elseif(strtolower($sensor['label']) === 'ph')
+                                <button type="button" onclick="openCalibrationPHModal()" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
+                                    <i class="fas fa-sliders-h"></i> Kalibrasi
+                                </button>
+                            @elseif(strtolower($sensor['label']) === 'tds' || strtolower($sensor['label']) === 'total dissolved solids')
+                                <button type="button" onclick="openCalibrationTDSModal('kValueTDS')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
+                                    <i class="fas fa-sliders-h"></i> Kalibrasi
+                                </button>
+                            @elseif(strtolower($sensor['label']) === 'kekeruhan' || strtolower($sensor['label']) === 'turbidity')
+                                <button type="button" onclick="openCalibrationTurbidityModal('TurbidityOffset')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
+                                    <i class="fas fa-sliders-h"></i> Kalibrasi
+                                </button>
+                            @elseif(strtolower($sensor['label']) === 'suhu' || strtolower($sensor['label']) === 'temperatur' || strtolower($sensor['label']) === 'temperature')
+                                <button type="button" onclick="openCalibrationTempModal('TempOffset')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
+                                    <i class="fas fa-sliders-h"></i> Kalibrasi
+                                </button>
+                            @endif
                         </article>
                     @endforeach
                 </div>
             </section>
-
-            <!-- Chart and AI Section -->
-            <div class="flex flex-wrap gap-6">
-                <!-- Chart Section -->
-                <div class="rounded-2xl border flex-3 border-slate-200 row-span-1 bg-white p-5 shadow-sm">
-                    <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
-                        <div>
-                            <h2 class="flex items-center gap-3 text-xl font-bold text-slate-900">
-                                <i class="fas fa-chart-line text-sky-500"></i>
-                                Grafik Tren Data Sensor
-                            </h2>
-                            <p class="mt-1 text-sm text-slate-500">Data historis sensor dalam 24 jam terakhir</p>
-                        </div>
-                    </div>
-
-                    <!-- Range Buttons -->
-                    <div class="mb-4 flex flex-wrap gap-2">
-                        <button onclick="changeChartRange('6')" id="range6Btn"
-                            class="range-btn rounded-full border px-4 py-2 text-sm font-semibold transition bg-emerald-500 text-white border-emerald-500">
-                            6 Jam
-                        </button>
-                        <button onclick="changeChartRange('12')" id="range12Btn"
-                            class="range-btn rounded-full border px-4 py-2 text-sm font-semibold transition bg-white text-slate-600 border-slate-200 hover:bg-slate-50">
-                            12 Jam
-                        </button>
-                        <button onclick="changeChartRange('24')" id="range24Btn"
-                            class="range-btn rounded-full border px-4 py-2 text-sm font-semibold transition bg-white text-slate-600 border-slate-200 hover:bg-slate-50">
-                            24 Jam
-                        </button>
-                    </div>
-
-                    <!-- Chart Canvas -->
-                    <div class="chart-container">
-                        <canvas id="sensorChart"></canvas>
-                    </div>
-
-                    <!-- Chart Info -->
-                    <div class="mt-4 text-center text-xs text-slate-400">
-                        <i class="fas fa-chart-line mr-1"></i> Grafik menunjukkan tren nilai sensor dari waktu ke waktu
-                    </div>
-                </div>
-            </div>
 
             <!-- AI Recommendations Section -->
             <div class="space-y-6 mt-6 flex gap-2">
@@ -580,123 +670,97 @@
 @section('script')
     <script>
         // Global variables
-        let sensorChart;
         let currentRange = '24';
         let deviceType = document.querySelector('[data-device-type]')?.dataset.deviceType || 'aquaviska';
         let deviceCode = document.querySelector('[data-device-api]')?.dataset.deviceCode || '';
+        let sensorMiniCharts = {};
+        let deviceSensorChartData = {!! json_encode($deviceDataMonitoring['chart'] ?? []) !!};
 
-        // Initialize Chart
-        async function initChart() {
-            const ctx = document.getElementById('sensorChart').getContext('2d');
+        function getChartColorForSensor(sensorKey) {
+            const colors = {
+                ph: { border: '#ec4899', background: 'rgba(236, 72, 153, 0.12)' },
+                do: { border: '#0ea5e9', background: 'rgba(14, 165, 233, 0.14)' },
+                temperature: { border: '#f97316', background: 'rgba(249, 115, 22, 0.13)' },
+                tds: { border: '#14b8a6', background: 'rgba(20, 184, 166, 0.14)' },
+                turbidity: { border: '#8b5cf6', background: 'rgba(139, 92, 246, 0.14)' },
+                humidity: { border: '#22c55e', background: 'rgba(34, 197, 94, 0.14)' },
+                uv: { border: '#facc15', background: 'rgba(250, 204, 21, 0.14)' },
+                co2: { border: '#a3e635', background: 'rgba(163, 230, 53, 0.14)' },
+                default: { border: '#0ea5e9', background: 'rgba(14, 165, 233, 0.12)' }
+            };
 
-            sensorChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Loading data...',
-                        data: [],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
-                        }
+            return colors[sensorKey] || colors.default;
+        }
+
+        function renderSensorMiniCharts(range, chartSeries) {
+            document.querySelectorAll('.sensor-mini-chart').forEach((canvas) => {
+                const sensorKey = canvas.dataset.sensorKey;
+                const series = chartSeries?.[range]?.[sensorKey] || chartSeries?.[sensorKey] || null;
+                const labels = deviceSensorChartData?.[range]?.labels || [];
+                const data = series?.data || [];
+                const label = series?.label || sensorKey;
+                const colors = series?.borderColor ? { border: series.borderColor, background: series.backgroundColor } : getChartColorForSensor(sensorKey);
+
+                if (sensorMiniCharts[sensorKey]) {
+                    sensorMiniCharts[sensorKey].data.labels = labels;
+                    sensorMiniCharts[sensorKey].data.datasets[0].data = data;
+                    sensorMiniCharts[sensorKey].data.datasets[0].label = label;
+                    sensorMiniCharts[sensorKey].data.datasets[0].borderColor = colors.border;
+                    sensorMiniCharts[sensorKey].data.datasets[0].backgroundColor = colors.background;
+                    sensorMiniCharts[sensorKey].update();
+                    return;
+                }
+
+                const ctx = canvas.getContext('2d');
+                sensorMiniCharts[sensorKey] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            borderColor: colors.border,
+                            backgroundColor: colors.background,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 0,
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: '#e2e8f0'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Nilai Sensor',
-                                font: {
-                                    size: 10
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
                                 display: false
                             },
-                            title: {
-                                display: true,
-                                text: 'Waktu',
-                                font: {
-                                    size: 10
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.formattedValue}`;
+                                    }
                                 }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                display: false,
+                                grid: { display: false }
+                            },
+                            y: {
+                                display: false,
+                                grid: { display: false }
                             }
                         }
                     }
-                }
+                });
             });
-
-            await loadChartData(currentRange);
         }
 
-        // Load chart data from API
-        async function loadChartData(range) {
-            try {
-                const response = await fetch(`/device/${deviceType}/${deviceCode}/history?range=${range}`);
-                const result = await response.json();
-
-                if (result.success && result.data && result.data[range]) {
-                    const chartData = result.data[range];
-                    const dataset = chartData.datasets[0];
-
-                    sensorChart.data.labels = chartData.labels;
-                    sensorChart.data.datasets[0].label = dataset.label;
-                    sensorChart.data.datasets[0].data = dataset.data;
-                    sensorChart.data.datasets[0].borderColor = deviceType === 'aquaviska' ? '#06b6d4' : '#f97316';
-                    sensorChart.data.datasets[0].backgroundColor = deviceType === 'aquaviska' ?
-                        'rgba(6, 182, 212, 0.1)' : 'rgba(249, 115, 22, 0.1)';
-                    sensorChart.update();
-                } else {
-                    console.warn('No chart data available');
-                }
-            } catch (error) {
-                console.error('Error loading chart data:', error);
-            }
-        }
-
-        // Change chart range
-        async function changeChartRange(range) {
-            currentRange = range;
-
-            // Update button styles
-            document.querySelectorAll('.range-btn').forEach(btn => {
-                btn.classList.remove('bg-emerald-500', 'text-white', 'border-emerald-500');
-                btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
-            });
-
-            const activeBtn = document.getElementById(`range${range}Btn`);
-            if (activeBtn) {
-                activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-                activeBtn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500');
-            }
-
-            await loadChartData(range);
+        function initSensorMiniCharts() {
+            renderSensorMiniCharts(currentRange, deviceSensorChartData.chart_series || {});
         }
 
         // Real-time polling for device data
@@ -707,9 +771,28 @@
             const apiUrl = root.dataset.deviceApi;
             const pollInterval = 5000;
             let lastSignature = '';
+            const highlightTimers = new WeakMap();
 
             function statusClass(status) {
                 return status === 'normal' ? 'good' : (status === 'waspada' ? 'medium' : 'bad');
+            }
+
+            function flashUpdatedCard(card) {
+                if (!card) return;
+
+                const existingTimer = highlightTimers.get(card);
+                if (existingTimer) {
+                    clearTimeout(existingTimer);
+                }
+
+                card.classList.add('is-updated');
+
+                const timer = window.setTimeout(() => {
+                    card.classList.remove('is-updated');
+                    highlightTimers.delete(card);
+                }, 1800);
+
+                highlightTimers.set(card, timer);
             }
 
             async function fetchDeviceDetail() {
@@ -732,7 +815,36 @@
 
                 if (scoreValue && typeof data.condition_score !== 'undefined') scoreValue.textContent = data
                     .condition_score;
-                if (reportStatus && data.status) reportStatus.textContent = data.status;
+                if (reportStatus && data.status) {
+                    const isOnline = data.status === 'online';
+                    reportStatus.textContent = isOnline ? 'Online - Siap dipantau' : 'Offline - Tidak aktif';
+                    
+                    const indicator = document.getElementById('status-indicator');
+                    if(indicator) {
+                        const pingAnim = indicator.querySelector('.ping-anim');
+                        const dotColor = indicator.querySelector('.dot-color');
+                        
+                        if(isOnline) {
+                            if(pingAnim) {
+                                pingAnim.classList.remove('hidden', 'bg-red-500');
+                                pingAnim.classList.add('animate-ping', 'bg-emerald-400');
+                            }
+                            if(dotColor) {
+                                dotColor.classList.remove('bg-red-500');
+                                dotColor.classList.add('bg-emerald-400');
+                            }
+                        } else {
+                            if(pingAnim) {
+                                pingAnim.classList.remove('animate-ping', 'bg-emerald-400');
+                                pingAnim.classList.add('hidden', 'bg-red-500');
+                            }
+                            if(dotColor) {
+                                dotColor.classList.remove('bg-emerald-400');
+                                dotColor.classList.add('bg-red-500');
+                            }
+                        }
+                    }
+                }
                 if (reportScore && typeof data.condition_score !== 'undefined') reportScore.textContent = data
                     .condition_score;
 
@@ -778,8 +890,14 @@
                     const valueEl = card.querySelector('.sensor-value');
                     const statusEl = card.querySelector('.sensor-status');
                     const barEl = card.querySelector('.sensor-bar-fill');
+                    const nextValue = sensor.value ?? '—';
+                    const previousValue = valueEl?.dataset.currentValue ?? valueEl?.textContent?.trim() ?? '';
+                    const valueChanged = String(previousValue).trim() !== String(nextValue).trim();
 
-                    if (valueEl) valueEl.textContent = sensor.value;
+                    if (valueEl) {
+                        valueEl.textContent = nextValue;
+                        valueEl.dataset.currentValue = String(nextValue);
+                    }
                     if (statusEl) {
                         const tone = statusClass(sensor.status);
                         statusEl.textContent = sensor.status.charAt(0).toUpperCase() + sensor.status.slice(1);
@@ -789,6 +907,10 @@
                         const tone = statusClass(sensor.status);
                         barEl.className = `sensor-bar-fill ${tone}`;
                         barEl.style.width = `${sensor.pct}%`;
+                    }
+
+                    if (valueChanged) {
+                        flashUpdatedCard(card);
                     }
                 });
             }
@@ -828,7 +950,7 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initChart();
+            initSensorMiniCharts();
         });
 
         // Optional: Tambahkan efek tambahan saat button di-click
@@ -847,5 +969,456 @@
                 });
             }
         });
+
+        // Calibration DO Modal functions
+        let currentCalibrationField = '';
+        
+        function openCalibrationDOModal(field) {
+            currentCalibrationField = field;
+            document.getElementById('calibration-modal-do').classList.remove('hidden');
+            document.getElementById('calibration-modal-do').classList.add('flex');
+            document.getElementById('input-voltage-do').value = '';
+        }
+
+        function closeCalibrationDOModal() {
+            document.getElementById('calibration-modal-do').classList.add('hidden');
+            document.getElementById('calibration-modal-do').classList.remove('flex');
+        }
+
+        async function submitCalibrationDO(e) {
+            e.preventDefault();
+            const value = document.getElementById('input-voltage-do').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            if (!value) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`{{ route('api.device.calibration.field.update', ['device' => $device, 'id' => $deviceDataInfo['device_code']]) }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        field: currentCalibrationField,
+                        value: value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCalibrationDOModal();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat menyimpan kalibrasi');
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message
+                });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Calibration pH Modal functions
+        function openCalibrationPHModal() {
+            document.getElementById('calibration-modal-ph').classList.remove('hidden');
+            document.getElementById('calibration-modal-ph').classList.add('flex');
+            document.getElementById('input-voltage-ph4').value = '';
+            document.getElementById('input-voltage-ph6').value = '';
+        }
+
+        function closeCalibrationPHModal() {
+            document.getElementById('calibration-modal-ph').classList.add('hidden');
+            document.getElementById('calibration-modal-ph').classList.remove('flex');
+        }
+
+        async function submitCalibrationPH(e) {
+            e.preventDefault();
+            const valuePH4 = document.getElementById('input-voltage-ph4').value;
+            const valuePH6 = document.getElementById('input-voltage-ph6').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            if (!valuePH4 || !valuePH6) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`{{ route('api.device.calibration.fields.update', ['device' => $device, 'id' => $deviceDataInfo['device_code']]) }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        fields: {
+                            voltagePH4: valuePH4,
+                            voltagePH6: valuePH6
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCalibrationPHModal();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat menyimpan kalibrasi');
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message
+                });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Calibration TDS Modal functions
+        let currentCalibrationFieldTDS = '';
+
+        function openCalibrationTDSModal(field) {
+            currentCalibrationFieldTDS = field;
+            document.getElementById('calibration-modal-tds').classList.remove('hidden');
+            document.getElementById('calibration-modal-tds').classList.add('flex');
+            document.getElementById('input-kvalue-tds').value = '';
+        }
+
+        function closeCalibrationTDSModal() {
+            document.getElementById('calibration-modal-tds').classList.add('hidden');
+            document.getElementById('calibration-modal-tds').classList.remove('flex');
+        }
+
+        async function submitCalibrationTDS(e) {
+            e.preventDefault();
+            const value = document.getElementById('input-kvalue-tds').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            if (!value) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`{{ route('api.device.calibration.field.update', ['device' => $device, 'id' => $deviceDataInfo['device_code']]) }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        field: currentCalibrationFieldTDS,
+                        value: value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCalibrationTDSModal();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat menyimpan kalibrasi');
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message
+                });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Calibration Turbidity Modal functions
+        let currentCalibrationFieldTurbidity = '';
+
+        function openCalibrationTurbidityModal(field) {
+            currentCalibrationFieldTurbidity = field;
+            document.getElementById('calibration-modal-turbidity').classList.remove('hidden');
+            document.getElementById('calibration-modal-turbidity').classList.add('flex');
+            document.getElementById('input-offset-turbidity').value = '';
+        }
+
+        function closeCalibrationTurbidityModal() {
+            document.getElementById('calibration-modal-turbidity').classList.add('hidden');
+            document.getElementById('calibration-modal-turbidity').classList.remove('flex');
+        }
+
+        async function submitCalibrationTurbidity(e) {
+            e.preventDefault();
+            const value = document.getElementById('input-offset-turbidity').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            if (!value) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`{{ route('api.device.calibration.field.update', ['device' => $device, 'id' => $deviceDataInfo['device_code']]) }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        field: currentCalibrationFieldTurbidity,
+                        value: value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCalibrationTurbidityModal();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat menyimpan kalibrasi');
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message
+                });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Calibration Temperature Modal functions
+        let currentCalibrationFieldTemp = '';
+
+        function openCalibrationTempModal(field) {
+            currentCalibrationFieldTemp = field;
+            document.getElementById('calibration-modal-temp').classList.remove('hidden');
+            document.getElementById('calibration-modal-temp').classList.add('flex');
+            document.getElementById('input-offset-temp').value = '';
+        }
+
+        function closeCalibrationTempModal() {
+            document.getElementById('calibration-modal-temp').classList.add('hidden');
+            document.getElementById('calibration-modal-temp').classList.remove('flex');
+        }
+
+        async function submitCalibrationTemp(e) {
+            e.preventDefault();
+            const value = document.getElementById('input-offset-temp').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            if (!value) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`{{ route('api.device.calibration.field.update', ['device' => $device, 'id' => $deviceDataInfo['device_code']]) }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        field: currentCalibrationFieldTemp,
+                        value: value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeCalibrationTempModal();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: data.message
+                    });
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan saat menyimpan kalibrasi');
+                }
+            } catch (error) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: error.message
+                });
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
     </script>
+
+    <!-- Modal Calibration DO -->
+    <div id="calibration-modal-do" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Kalibrasi Sensor DO</h3>
+            <form id="calibration-form-do" onsubmit="submitCalibrationDO(event)">
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Voltage DO 100%</label>
+                    <input type="number" step="any" id="input-voltage-do" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: 1.5" required>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationDOModal()">Batal</button>
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Calibration pH -->
+    <div id="calibration-modal-ph" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Kalibrasi Sensor pH</h3>
+            <form id="calibration-form-ph" onsubmit="submitCalibrationPH(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Voltage pH 4</label>
+                    <input type="number" step="any" id="input-voltage-ph4" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: 2.1" required>
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Voltage pH 6.86 (atau pH 7)</label>
+                    <input type="number" step="any" id="input-voltage-ph6" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: 1.8" required>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationPHModal()">Batal</button>
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Calibration TDS -->
+    <div id="calibration-modal-tds" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Kalibrasi Sensor TDS</h3>
+            <form id="calibration-form-tds" onsubmit="submitCalibrationTDS(event)">
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">kValue TDS</label>
+                    <input type="number" step="any" id="input-kvalue-tds" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: 1.0" required>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationTDSModal()">Batal</button>
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Calibration Turbidity -->
+    <div id="calibration-modal-turbidity" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Kalibrasi Sensor Kekeruhan</h3>
+            <form id="calibration-form-turbidity" onsubmit="submitCalibrationTurbidity(event)">
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Turbidity Offset</label>
+                    <input type="number" step="any" id="input-offset-turbidity" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: 0.5" required>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationTurbidityModal()">Batal</button>
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Calibration Temperature -->
+    <div id="calibration-modal-temp" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Kalibrasi Sensor Suhu</h3>
+            <form id="calibration-form-temp" onsubmit="submitCalibrationTemp(event)">
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Temperature Offset</label>
+                    <input type="number" step="any" id="input-offset-temp" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" placeholder="Contoh: -1.5" required>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100" onclick="closeCalibrationTempModal()">Batal</button>
+                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
+

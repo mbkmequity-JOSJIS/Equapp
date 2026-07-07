@@ -171,7 +171,7 @@
             @if (isset($dataDevices) && count($dataDevices) > 0)
                 <div class="location-grid">
                     @foreach ($dataDevices as $index => $data)
-                        <a href="{{ route('device.detail', ['device' => $device, 'id' => $data['device_code']]) }}"
+                        <a href="{{ route('device.detail', ['device' => $device, 'id' => $data['device_code'] ?? '']) }}"
                             class="location-card group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 block">
 
                             <!-- Card Image / Header Section -->
@@ -240,16 +240,22 @@
                                 <!-- Status & Info Row -->
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                                        <span
-                                            class="quality-badge text-xs font-medium px-2.5 py-1 rounded-full text-green-700 bg-green-100 text-green-700 ">
-                                            Live
-                                        </span>
+                                        @if(isset($data['status']) && strtolower($data['status']) === 'online')
+                                            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                            <span class="quality-badge text-xs font-medium px-2.5 py-1 rounded-full text-green-700 bg-green-100">
+                                                Live
+                                            </span>
+                                        @else
+                                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                            <span class="quality-badge text-xs font-medium px-2.5 py-1 rounded-full text-red-700 bg-red-100">
+                                                Offline
+                                            </span>
+                                        @endif
                                     </div>
 
                                     <div class="flex items-center gap-1 text-slate-400 text-xs">
                                         <i class="fas fa-microchip"></i>
-                                        <span>Online</span>
+                                        <span>{{ isset($data['status']) ? ucfirst($data['status']) : 'Offline' }}</span>
                                     </div>
                                 </div>
 

@@ -296,6 +296,20 @@ const LocationSensorUpdater = {
     return mapping[label] || null;
   },
 
+  flashUpdatedCard(card) {
+    if (!card) return;
+
+    if (card._updateHighlightTimer) {
+      clearTimeout(card._updateHighlightTimer);
+    }
+
+    card.classList.add('is-updated');
+    card._updateHighlightTimer = setTimeout(() => {
+      card.classList.remove('is-updated');
+      card._updateHighlightTimer = null;
+    }, 1800);
+  },
+
   /**
    * Update all sensor cards with new data
    */
@@ -307,7 +321,7 @@ const LocationSensorUpdater = {
       const label = card.getAttribute('data-sensor-label');
       const key = this.getKeyFromLabel(label);
 
-      if (!key || !apiData[key]) {
+      if (!key || typeof apiData[key] === 'undefined' || apiData[key] === null) {
         console.warn(`[LocationSensorUpdater] No data for sensor: ${label} (key: ${key})`);
         return;
       }
@@ -317,16 +331,19 @@ const LocationSensorUpdater = {
         ? indicator.value
         : '—';
       const status = indicator.status || 'unknown';
+      const sensorValue = card.querySelector('.sensor-value');
+      const previousValue = sensorValue?.dataset.currentValue ?? sensorValue?.textContent?.trim() ?? '';
+      const valueChanged = String(previousValue).trim() !== String(value).trim();
 
       console.log(`[LocationSensorUpdater] Updating ${label}: ${value} → ${status}`);
 
       // Update sensor value
-      const sensorValue = card.querySelector('.sensor-value');
       if (sensorValue) {
         // Keep the unit intact
         const unitElement = sensorValue.querySelector('.sensor-unit');
         const unit = unitElement?.textContent || '';
         sensorValue.innerHTML = `${value}<span class="sensor-unit">${unit}</span>`;
+        sensorValue.dataset.currentValue = String(value);
       }
 
       // Update sensor bar (status color and percentage)
@@ -368,6 +385,10 @@ const LocationSensorUpdater = {
         }
         sensorStatus.classList.add(statusClass);
         sensorStatus.textContent = statusText;
+      }
+
+      if (valueChanged) {
+        this.flashUpdatedCard(card);
       }
 
       updateCount++;

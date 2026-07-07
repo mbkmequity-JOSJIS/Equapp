@@ -33,6 +33,21 @@ class DeviceController extends Controller
             abort(404);
         }
 
+        // Filter: only show approved (is_preview = true) and not deleted
+        $filtered = [];
+        if (is_array($dataDevices)) {
+            foreach($dataDevices as $key => $d) {
+                $isPreview = isset($d['is_preview']) && ($d['is_preview'] === true || $d['is_preview'] === 'true');
+                $isDeleted = isset($d['is_deleted']) && ($d['is_deleted'] === true || $d['is_deleted'] === 'true');
+                
+                if ($isPreview && !$isDeleted) {
+                    $d['node'] = $key;
+                    $filtered[$key] = $d;
+                }
+            }
+        }
+        $dataDevices = $filtered;
+
         return view('devices.device-list', compact('dataDevices', 'device'));
     }
 
@@ -138,6 +153,56 @@ class DeviceController extends Controller
         }
     }
 
+    public function updateCalibrationField(Request $request, $device, $device_code): JsonResponse
+    {
+        $request->validate([
+            'field' => 'required|string|max:100',
+            'value' => 'required|numeric',
+        ]);
+
+        try {
+            $this->firebaseService->updateCalibrationField($device, $device_code, $request->field, (float) $request->value);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai kalibrasi berhasil diperbarui.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memperbarui nilai kalibrasi',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateCalibrationFields(Request $request, $device, $device_code): JsonResponse
+    {
+        $request->validate([
+            'fields' => 'required|array',
+        ]);
+
+        try {
+            $formattedFields = [];
+            foreach ($request->fields as $key => $value) {
+                $formattedFields[$key] = (float) $value;
+            }
+
+            $this->firebaseService->updateCalibrationFields($device, $device_code, $formattedFields);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nilai kalibrasi berhasil diperbarui.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal memperbarui nilai kalibrasi',
+                'details' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     private function resolveDeviceDetail($device, $device_code): array
     {
         if ($device == 'aquaviska') {
@@ -164,10 +229,11 @@ class DeviceController extends Controller
     private function prepareDeviceMonitoring(array $deviceDataMonitoring): array
     {
         $latest = $deviceDataMonitoring['latest'] ?? [];
+        $rawVoltage = $latest['raw_voltage'] ?? [];
         $sensors = [];
 
         foreach ($latest as $sensor => $value) {
-            if ($sensor === 'timestamp' || $sensor === 'condition_score' || $sensor === 'status') {
+            if ($sensor === 'timestamp' || $sensor === 'condition_score' || $sensor === 'status' || is_array($value)) {
                 continue;
             }
 
@@ -176,11 +242,13 @@ class DeviceController extends Controller
             $unit = $this->getSensorUnit($sensor);
 
             $sensors[] = [
+                'key' => $sensor,
                 'label' => $label,
                 'value' => $value,
                 'unit' => $unit,
                 'status' => $status,
                 'pct' => $this->getSensorPct($sensor, (float) $value, $status),
+                'raw_voltage' => $rawVoltage[$sensor] ?? null,
             ];
         }
 
@@ -199,7 +267,7 @@ class DeviceController extends Controller
 
         return match (true) {
             str_contains($sensorLower, 'temperature') || str_contains($sensorLower, 'suhu') => '°C',
-            str_contains($sensorLower, 'ph') => '',
+            str_contains($sensorLower, 'ph') => 'pH',
             str_contains($sensorLower, 'turbidity') || str_contains($sensorLower, 'kekeruhan') => 'NTU',
             str_contains($sensorLower, 'do') => 'mg/L',
             str_contains($sensorLower, 'tds') => 'ppm',
@@ -267,13 +335,13 @@ class DeviceController extends Controller
 
         usort($normalized, fn($a, $b) => $a['timestamp']->timestamp - $b['timestamp']->timestamp);
 
-        $sensorKeys = array_unique($allSensorKeys);
+        $sensorKeys = array_values(array_unique($allSensorKeys));
 
         // Pilih sensor utama untuk chart
         $prioritySensors = ['ph', 'do', 'temperature', 'tds', 'turbidity'];
         $primarySensor = null;
         foreach ($prioritySensors as $priority) {
-            if (in_array($priority, $sensorKeys)) {
+            if (in_array($priority, $sensorKeys, true)) {
                 $primarySensor = $priority;
                 break;
             }
@@ -285,6 +353,7 @@ class DeviceController extends Controller
 
         $ranges = ['6', '12', '24'];
         $result = [];
+        $chartSeries = [];
 
         foreach ($ranges as $range) {
             $cutoff = now()->subHours((int) $range);
@@ -311,23 +380,96 @@ class DeviceController extends Controller
                     'unit' => $this->getSensorUnit($primarySensor),
                 ]],
             ];
+
+            foreach ($sensorKeys as $sensorKey) {
+                $seriesData = [];
+                foreach ($window as $row) {
+                    $seriesData[] = isset($row['values'][$sensorKey]) ? round($row['values'][$sensorKey], 2) : null;
+                }
+
+                $color = $this->getSensorChartColor($sensorKey);
+                $chartSeries[$range][$sensorKey] = [
+                    'label' => $this->getSensorLabel($sensorKey),
+                    'data' => $seriesData,
+                    'unit' => $this->getSensorUnit($sensorKey),
+                    'borderColor' => $color['border'],
+                    'backgroundColor' => $color['background'],
+                ];
+            }
         }
 
-        return $result;
+        return array_merge($result, [
+            'sensor_keys' => $sensorKeys,
+            'chart_series' => $chartSeries,
+        ]);
+    }
+
+    private function getSensorChartColor(string $sensor): array
+    {
+        $sensorLower = strtolower($sensor);
+
+        return match (true) {
+            str_contains($sensorLower, 'ph') => ['border' => '#ec4899', 'background' => 'rgba(236, 72, 153, 0.12)'],
+            str_contains($sensorLower, 'do') => ['border' => '#0ea5e9', 'background' => 'rgba(14, 165, 233, 0.14)'],
+            str_contains($sensorLower, 'temperature') || str_contains($sensorLower, 'suhu') => ['border' => '#f97316', 'background' => 'rgba(249, 115, 22, 0.13)'],
+            str_contains($sensorLower, 'tds') => ['border' => '#14b8a6', 'background' => 'rgba(20, 184, 166, 0.14)'],
+            str_contains($sensorLower, 'turbidity') || str_contains($sensorLower, 'kekeruhan') => ['border' => '#8b5cf6', 'background' => 'rgba(139, 92, 246, 0.14)'],
+            str_contains($sensorLower, 'humidity') || str_contains($sensorLower, 'kelembab') => ['border' => '#22c55e', 'background' => 'rgba(34, 197, 94, 0.14)'],
+            str_contains($sensorLower, 'pm25') || str_contains($sensorLower, 'pm 25') => ['border' => '#64748b', 'background' => 'rgba(100, 116, 139, 0.14)'],
+            str_contains($sensorLower, 'uv') => ['border' => '#facc15', 'background' => 'rgba(250, 204, 21, 0.14)'],
+            str_contains($sensorLower, 'co2') => ['border' => '#a3e635', 'background' => 'rgba(163, 230, 53, 0.14)'],
+            str_contains($sensorLower, 'angin') || str_contains($sensorLower, 'wind') => ['border' => '#38bdf8', 'background' => 'rgba(56, 189, 248, 0.14)'],
+            str_contains($sensorLower, 'curah') || str_contains($sensorLower, 'rain') => ['border' => '#0d9488', 'background' => 'rgba(13, 148, 136, 0.14)'],
+            default => ['border' => '#0ea5e9', 'background' => 'rgba(14, 165, 233, 0.12)'],
+        };
     }
 
     private function buildFallbackChartSeries(string $deviceType): array
     {
         if ($deviceType === 'AQUAVISKA') {
-            $baseSeries = ['label' => 'pH', 'data' => [7.0, 7.1, 7.1, 7.2, 7.2, 7.3, 7.2], 'unit' => ''];
+            $sensors = ['ph', 'do', 'tds', 'turbidity', 'temperature'];
+            $sampleData = [
+                'ph' => [7.0, 7.1, 7.1, 7.2, 7.2, 7.3, 7.2],
+                'do' => [5.2, 5.3, 5.4, 5.5, 5.5, 5.6, 5.5],
+                'tds' => [250, 260, 270, 280, 290, 300, 295],
+                'turbidity' => [5, 6, 7, 8, 9, 10, 9],
+                'temperature' => [28.0, 28.2, 28.4, 28.5, 28.6, 28.7, 28.5],
+            ];
         } else {
-            $baseSeries = ['label' => 'Temperature', 'data' => [28.0, 28.4, 28.8, 29.1, 29.4, 29.7, 29.5], 'unit' => '°C'];
+            $sensors = ['temperature', 'humidity', 'pm25', 'uv'];
+            $sampleData = [
+                'temperature' => [28.0, 28.4, 28.8, 29.1, 29.4, 29.7, 29.5],
+                'humidity' => [65, 68, 70, 72, 74, 76, 75],
+                'pm25' => [45, 48, 50, 52, 55, 58, 56],
+                'uv' => [5.2, 5.5, 5.8, 6.1, 6.4, 6.7, 6.5],
+            ];
+        }
+
+        $labels = ['-6j', '-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'];
+        $ranges = ['6', '12', '24'];
+        $result = [];
+        $chartSeries = [];
+
+        foreach ($ranges as $range) {
+            foreach ($sensors as $sensor) {
+                $color = $this->getSensorChartColor($sensor);
+                $fallbackSeries = [
+                    'label' => $this->getSensorLabel($sensor),
+                    'data' => $sampleData[$sensor] ?? [0, 0, 0, 0, 0, 0, 0],
+                    'unit' => $this->getSensorUnit($sensor),
+                    'borderColor' => $color['border'],
+                    'backgroundColor' => $color['background'],
+                ];
+                $chartSeries[$range][$sensor] = $fallbackSeries;
+            }
         }
 
         return [
-            '6' => ['labels' => ['-6j', '-5j', '-4j', '-3j', '-2j', '-1j', 'Sekarang'], 'datasets' => [$baseSeries]],
-            '12' => ['labels' => ['-12j', '-10j', '-8j', '-6j', '-4j', '-2j', 'Sekarang'], 'datasets' => [$baseSeries]],
-            '24' => ['labels' => ['-24j', '-20j', '-16j', '-12j', '-8j', '-4j', 'Sekarang'], 'datasets' => [$baseSeries]],
+            '6' => ['labels' => $labels, 'datasets' => []],
+            '12' => ['labels' => ['-12j', '-10j', '-8j', '-6j', '-4j', '-2j', 'Sekarang'], 'datasets' => []],
+            '24' => ['labels' => ['-24j', '-20j', '-16j', '-12j', '-8j', '-4j', 'Sekarang'], 'datasets' => []],
+            'sensor_keys' => $sensors,
+            'chart_series' => $chartSeries,
         ];
     }
 
