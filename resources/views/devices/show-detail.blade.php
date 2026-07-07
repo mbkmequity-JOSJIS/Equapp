@@ -83,6 +83,12 @@
             display: none;
         }
 
+        .sensor-card canvas {
+            width: 100% !important;
+            height: 140px !important;
+            max-height: 140px;
+        }
+
         /* Modal Custom Styles */
         .modal-transition {
             transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -294,16 +300,6 @@
                     </div>
 
                     <div class="flex flex-col justify-end items-end gap-4">
-                        <div class="rounded-3xl border border-white/15 bg-white/90 p-5 shadow-xl backdrop-blur"
-                            id="score-badge">
-                            <p class="text-sm font-medium text-slate-500">Skor Kondisi</p>
-                            <div class="mt-2 flex items-end gap-2">
-                                <span class="text-5xl font-black tracking-tight text-slate-900"
-                                    id="condition-score">{{ $deviceScore }}</span>
-                                <span class="pb-1 text-lg font-semibold text-slate-500">/100</span>
-                            </div>
-                        </div>
-
                         <div class="rounded-3xl border border-white/15 bg-white/10 p-5 text-white backdrop-blur">
                             <p class="text-sm text-slate-200">Live Status</p>
                             <div class="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm text-slate-100">
@@ -491,6 +487,16 @@
                                 </div>
                             </div>
 
+                            <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                                <div class="flex items-center justify-between mb-2 text-sm font-semibold text-slate-700">
+                                    <span>Tren {{ $sensor['label'] }}</span>
+                                    <span class="text-xs text-slate-500">24 jam</span>
+                                </div>
+                                <div class="chart-card">
+                                    <canvas data-sensor-key="{{ $sensor['key'] }}" class="sensor-mini-chart"></canvas>
+                                </div>
+                            </div>
+
                             @if(strtolower($sensor['label']) === 'do' || strtolower($sensor['label']) === 'dissolved oxygen')
                                 <button type="button" onclick="openCalibrationDOModal('voltageDO_100')" class="absolute bottom-4 left-4 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm border border-blue-600">
                                     <i class="fas fa-sliders-h"></i> Kalibrasi
@@ -516,48 +522,6 @@
                     @endforeach
                 </div>
             </section>
-
-            <!-- Chart and AI Section -->
-            <div class="flex flex-wrap gap-6">
-                <!-- Chart Section -->
-                <div class="rounded-2xl border flex-3 border-slate-200 row-span-1 bg-white p-5 shadow-sm">
-                    <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
-                        <div>
-                            <h2 class="flex items-center gap-3 text-xl font-bold text-slate-900">
-                                <i class="fas fa-chart-line text-sky-500"></i>
-                                Grafik Tren Data Sensor
-                            </h2>
-                            <p class="mt-1 text-sm text-slate-500">Data historis sensor dalam 24 jam terakhir</p>
-                        </div>
-                    </div>
-
-                    <!-- Range Buttons -->
-                    <div class="mb-4 flex flex-wrap gap-2">
-                        <button onclick="changeChartRange('6')" id="range6Btn"
-                            class="range-btn rounded-full border px-4 py-2 text-sm font-semibold transition bg-emerald-500 text-white border-emerald-500">
-                            6 Jam
-                        </button>
-                        <button onclick="changeChartRange('12')" id="range12Btn"
-                            class="range-btn rounded-full border px-4 py-2 text-sm font-semibold transition bg-white text-slate-600 border-slate-200 hover:bg-slate-50">
-                            12 Jam
-                        </button>
-                        <button onclick="changeChartRange('24')" id="range24Btn"
-                            class="range-btn rounded-full border px-4 py-2 text-sm font-semibold transition bg-white text-slate-600 border-slate-200 hover:bg-slate-50">
-                            24 Jam
-                        </button>
-                    </div>
-
-                    <!-- Chart Canvas -->
-                    <div class="chart-container">
-                        <canvas id="sensorChart"></canvas>
-                    </div>
-
-                    <!-- Chart Info -->
-                    <div class="mt-4 text-center text-xs text-slate-400">
-                        <i class="fas fa-chart-line mr-1"></i> Grafik menunjukkan tren nilai sensor dari waktu ke waktu
-                    </div>
-                </div>
-            </div>
 
             <!-- AI Recommendations Section -->
             <div class="space-y-6 mt-6 flex gap-2">
@@ -706,123 +670,97 @@
 @section('script')
     <script>
         // Global variables
-        let sensorChart;
         let currentRange = '24';
         let deviceType = document.querySelector('[data-device-type]')?.dataset.deviceType || 'aquaviska';
         let deviceCode = document.querySelector('[data-device-api]')?.dataset.deviceCode || '';
+        let sensorMiniCharts = {};
+        let deviceSensorChartData = {!! json_encode($deviceDataMonitoring['chart'] ?? []) !!};
 
-        // Initialize Chart
-        async function initChart() {
-            const ctx = document.getElementById('sensorChart').getContext('2d');
+        function getChartColorForSensor(sensorKey) {
+            const colors = {
+                ph: { border: '#ec4899', background: 'rgba(236, 72, 153, 0.12)' },
+                do: { border: '#0ea5e9', background: 'rgba(14, 165, 233, 0.14)' },
+                temperature: { border: '#f97316', background: 'rgba(249, 115, 22, 0.13)' },
+                tds: { border: '#14b8a6', background: 'rgba(20, 184, 166, 0.14)' },
+                turbidity: { border: '#8b5cf6', background: 'rgba(139, 92, 246, 0.14)' },
+                humidity: { border: '#22c55e', background: 'rgba(34, 197, 94, 0.14)' },
+                uv: { border: '#facc15', background: 'rgba(250, 204, 21, 0.14)' },
+                co2: { border: '#a3e635', background: 'rgba(163, 230, 53, 0.14)' },
+                default: { border: '#0ea5e9', background: 'rgba(14, 165, 233, 0.12)' }
+            };
 
-            sensorChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Loading data...',
-                        data: [],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
-                        }
+            return colors[sensorKey] || colors.default;
+        }
+
+        function renderSensorMiniCharts(range, chartSeries) {
+            document.querySelectorAll('.sensor-mini-chart').forEach((canvas) => {
+                const sensorKey = canvas.dataset.sensorKey;
+                const series = chartSeries?.[range]?.[sensorKey] || chartSeries?.[sensorKey] || null;
+                const labels = deviceSensorChartData?.[range]?.labels || [];
+                const data = series?.data || [];
+                const label = series?.label || sensorKey;
+                const colors = series?.borderColor ? { border: series.borderColor, background: series.backgroundColor } : getChartColorForSensor(sensorKey);
+
+                if (sensorMiniCharts[sensorKey]) {
+                    sensorMiniCharts[sensorKey].data.labels = labels;
+                    sensorMiniCharts[sensorKey].data.datasets[0].data = data;
+                    sensorMiniCharts[sensorKey].data.datasets[0].label = label;
+                    sensorMiniCharts[sensorKey].data.datasets[0].borderColor = colors.border;
+                    sensorMiniCharts[sensorKey].data.datasets[0].backgroundColor = colors.background;
+                    sensorMiniCharts[sensorKey].update();
+                    return;
+                }
+
+                const ctx = canvas.getContext('2d');
+                sensorMiniCharts[sensorKey] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            borderColor: colors.border,
+                            backgroundColor: colors.background,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 0,
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: '#e2e8f0'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Nilai Sensor',
-                                font: {
-                                    size: 10
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
                                 display: false
                             },
-                            title: {
-                                display: true,
-                                text: 'Waktu',
-                                font: {
-                                    size: 10
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.formattedValue}`;
+                                    }
                                 }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                display: false,
+                                grid: { display: false }
+                            },
+                            y: {
+                                display: false,
+                                grid: { display: false }
                             }
                         }
                     }
-                }
+                });
             });
-
-            await loadChartData(currentRange);
         }
 
-        // Load chart data from API
-        async function loadChartData(range) {
-            try {
-                const response = await fetch(`/device/${deviceType}/${deviceCode}/history?range=${range}`);
-                const result = await response.json();
-
-                if (result.success && result.data && result.data[range]) {
-                    const chartData = result.data[range];
-                    const dataset = chartData.datasets[0];
-
-                    sensorChart.data.labels = chartData.labels;
-                    sensorChart.data.datasets[0].label = dataset.label;
-                    sensorChart.data.datasets[0].data = dataset.data;
-                    sensorChart.data.datasets[0].borderColor = deviceType === 'aquaviska' ? '#06b6d4' : '#f97316';
-                    sensorChart.data.datasets[0].backgroundColor = deviceType === 'aquaviska' ?
-                        'rgba(6, 182, 212, 0.1)' : 'rgba(249, 115, 22, 0.1)';
-                    sensorChart.update();
-                } else {
-                    console.warn('No chart data available');
-                }
-            } catch (error) {
-                console.error('Error loading chart data:', error);
-            }
-        }
-
-        // Change chart range
-        async function changeChartRange(range) {
-            currentRange = range;
-
-            // Update button styles
-            document.querySelectorAll('.range-btn').forEach(btn => {
-                btn.classList.remove('bg-emerald-500', 'text-white', 'border-emerald-500');
-                btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
-            });
-
-            const activeBtn = document.getElementById(`range${range}Btn`);
-            if (activeBtn) {
-                activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-                activeBtn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500');
-            }
-
-            await loadChartData(range);
+        function initSensorMiniCharts() {
+            renderSensorMiniCharts(currentRange, deviceSensorChartData.chart_series || {});
         }
 
         // Real-time polling for device data
@@ -1012,7 +950,7 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initChart();
+            initSensorMiniCharts();
         });
 
         // Optional: Tambahkan efek tambahan saat button di-click
