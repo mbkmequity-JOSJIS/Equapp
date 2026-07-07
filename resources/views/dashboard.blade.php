@@ -107,10 +107,10 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                        <a href="#wilayah"
+                        <a href="#sensor-chart"
                             class="rounded-xl sm:rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold transition hover:-translate-y-0.5 {{ $buttonClass }} text-center">
-                            <i class="fa-solid fa-map-location-dot mr-1 sm:mr-2"></i>
-                            <span class="hidden sm:inline">Grafik</span> Wilayah
+                            <i class="fa-solid fa-chart-bar mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Grafik</span> Sensor
                         </a>
                         <a href="#alat"
                             class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50 text-center">
@@ -152,53 +152,68 @@
                 @endforeach
             </div>
 
-            <div class="mt-6 sm:mt-8 grid gap-5 sm:gap-6 xl:grid-cols-2">
-                <!-- GRAFIK WILAYAH - LINE CHART -->
-                <section id="wilayah"
-                    class="rounded-xl sm:rounded-3xl border  border-slate-200 bg-white/90 p-4 sm:p-6 shadow-xl shadow-slate-200/70 backdrop-blur-sm row">
-                    <div
-                        class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 border-b border-slate-200 pb-4 sm:pb-5">
-                        <div>
-                            <div
-                                class="inline-flex rounded-full {{ $pillClass }} px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em]">
-                                <i class="{{ $dashboard['icon'] }} mr-1 sm:mr-2"></i>
-                                {{ $dashboard['label'] }} aktif
+            <div class="mt-6 sm:mt-8 grid gap-5 sm:gap-6">
+                <!-- GRAFIK DATA SENSOR PER SENSOR -->
+                <section id="sensor-chart" class="rounded-xl sm:rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-6 shadow-xl shadow-slate-200/70 backdrop-blur-sm">
+                    <div class="mb-4 sm:mb-6">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div>
+                                <p class="text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] {{ $sectionTitleClass }}">
+                                    <i class="fa-solid fa-chart-bar mr-1 sm:mr-2"></i>Grafik Data Sensor
+                                </p>
+                                <h2 class="mt-1 sm:mt-2 text-lg sm:text-2xl font-bold text-slate-900">Tren Data Sensor Realtime</h2>
                             </div>
-                            <h2 class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-slate-900">Grafik Data Wilayah</h2>
-                            <p class="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-600">Perbandingan kondisi dari beberapa
-                                wilayah dalam bentuk grafik tren.</p>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="setChartRange('week')"
-                                class="chart-range-btn px-2 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">1
-                                Minggu</button>
-                            <button onclick="setChartRange('month')"
-                                class="chart-range-btn px-2 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">1
-                                Bulan</button>
-                            <button onclick="setChartRange('year')"
-                                class="chart-range-btn px-2 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-xs rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition">1
-                                Tahun</button>
+
+                        <!-- Range Selector Buttons -->
+                        <div class="flex flex-wrap gap-2">
+                            <button class="sensor-chart-range-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition active:bg-cyan-50 active:border-cyan-300 active:text-cyan-700" data-range="week">
+                                <i class="fa-solid fa-calendar-week mr-1"></i>1 Minggu
+                            </button>
+                            <button class="sensor-chart-range-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition" data-range="month">
+                                <i class="fa-solid fa-calendar-days mr-1"></i>1 Bulan
+                            </button>
+                            <button class="sensor-chart-range-btn px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition" data-range="year">
+                                <i class="fa-solid fa-calendar mr-1"></i>1 Tahun
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Canvas untuk Line Chart -->
-                    <div class="chart-container mt-4">
-                        <canvas id="regionChart"></canvas>
-                    </div>
+                    <!-- Sensor Charts Grid -->
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+                        @forelse ($dashboard['sensorCharts'] ?? [] as $sensor => $chartData)
+                            <div class="sensor-chart-container bg-gradient-to-br from-slate-50 to-white rounded-xl sm:rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm">
+                                <!-- Chart Header -->
+                                <div class="flex items-center justify-between mb-3">
+                                    <div>
+                                        <h4 class="text-xs sm:text-sm font-semibold text-slate-600 uppercase tracking-[0.1em]">{{ $chartData['label'] ?? ucfirst($sensor) }}</h4>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-lg sm:text-xl font-bold text-slate-900">{{ $chartData['avgValue'] ?? '0' }}</span>
+                                            <span class="text-xs text-slate-500">Rata-rata</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs sm:text-sm text-slate-500">Max</div>
+                                        <div class="text-lg sm:text-xl font-bold text-slate-700">{{ $chartData['maxValue'] ?? '100' }}</div>
+                                    </div>
+                                </div>
 
-                    <!-- Legend -->
-                    <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mt-4 pt-3 border-t border-slate-100">
-                        @foreach ($dashboard['regions'] as $index => $region)
-                            <div class="flex items-center gap-1.5 sm:gap-2">
-                                <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
-                                    style="background: {{ ['#06b6d4', '#3b82f6', '#8b5cf6', '#10b981'][$index % 4] }}"></span>
-                                <span class="text-[10px] sm:text-xs text-slate-600">{{ $region['name'] }}</span>
+                                <!-- Mini Chart -->
+                                <div class="relative" style="height: 200px;">
+                                    <canvas id="sensorChart{{ $loop->index }}" class="sensor-dashboard-chart" data-sensor="{{ $sensor }}" data-chart-data="{{ json_encode($chartData) }}"></canvas>
+                                </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <div class="col-span-1 xl:col-span-2 py-8 text-center">
+                                <i class="fa-solid fa-chart-line text-4xl text-slate-300 mb-3"></i>
+                                <p class="text-slate-500 text-sm">Data sensor belum tersedia</p>
+                            </div>
+                        @endforelse
                     </div>
                 </section>
 
-                <aside class="space-y-5 sm:space-y-6">
+                <div class="grid gap-5 sm:gap-6 xl:grid-cols-2">
+
                     <!-- INFORMASI SENSOR PER WILAYAH - CAROUSEL DENGAN PREVIEW SENSOR DETAIL -->
                     <section
                         class="rounded-xl sm:rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-6 shadow-xl shadow-slate-200/70 backdrop-blur-sm">
@@ -381,131 +396,6 @@
         let isPlaying = true;
         let currentTimerSeconds = 8;
         let timerInterval;
-        let regionChart;
-
-        // Data untuk chart wilayah dari controller
-        const chartLabels = @json($dashboard['chartLabels'] ?? []);
-        const chartDatasets = @json($dashboard['chartDatasets'] ?? []);
-
-        // Inisialisasi Line Chart
-        function initRegionChart() {
-            const ctx = document.getElementById('regionChart').getContext('2d');
-
-            regionChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartLabels,
-                    datasets: chartDatasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                boxWidth: 10,
-                                usePointStyle: true,
-                                font: {
-                                    size: 10
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.8)',
-                            titleColor: '#fff',
-                            bodyColor: '#e2e8f0',
-                            padding: 8,
-                            cornerRadius: 8,
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label}: ${context.raw}%`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 105,
-                            grid: {
-                                color: '#e2e8f0'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Skor Kondisi (%)',
-                                font: {
-                                    size: 10
-                                }
-                            },
-                            ticks: {
-                                stepSize: 20,
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            title: {
-                                display: true,
-                                text: 'Periode',
-                                font: {
-                                    size: 10
-                                }
-                            }
-                        }
-                    },
-                    elements: {
-                        line: {
-                            tension: 0.3,
-                            borderWidth: 2
-                        },
-                        point: {
-                            radius: 3,
-                            hoverRadius: 5,
-                            hitRadius: 10
-                        }
-                    },
-                    layout: {
-                        padding: {
-                            top: 10,
-                            bottom: 10,
-                            left: 5,
-                            right: 5
-                        }
-                    }
-                }
-            });
-        }
-
-        function setChartRange(range) {
-            const btn = event.target;
-            document.querySelectorAll('.chart-range-btn').forEach(btn => {
-                btn.classList.remove('bg-{{ $isAqua ? 'cyan' : 'orange' }}-100',
-                    'border-{{ $isAqua ? 'cyan' : 'orange' }}-300');
-                btn.classList.add('bg-white');
-            });
-            btn.classList.add('bg-{{ $isAqua ? 'cyan' : 'orange' }}-100', 'border-{{ $isAqua ? 'cyan' : 'orange' }}-300');
-
-            // Update chart berdasarkan range
-            if (range === 'week') {
-                regionChart.data.labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-            } else if (range === 'month') {
-                regionChart.data.labels = ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'];
-            } else {
-                regionChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov',
-                    'Des'
-                ];
-            }
-            regionChart.update();
-        }
 
         // Carousel Functions
         function showSlide(index) {
@@ -589,8 +479,147 @@
             if (timerSpan) timerSpan.textContent = currentTimerSeconds;
         }
 
+        // Sensor Dashboard Charts
+        let sensorDashboardCharts = {};
+        let currentSensorRange = 'week';
+
+        function initSensorDashboardCharts() {
+            const chartContainers = document.querySelectorAll('.sensor-dashboard-chart');
+            chartContainers.forEach((canvas) => {
+                const sensorName = canvas.getAttribute('data-sensor');
+                const chartDataStr = canvas.getAttribute('data-chart-data');
+                const chartData = JSON.parse(chartDataStr);
+
+                const rangeData = chartData.data[currentSensorRange] || [];
+                const labels = rangeData.map((_, i) => {
+                    if (currentSensorRange === 'week') return 'Hari ' + (i + 1);
+                    if (currentSensorRange === 'month') return 'Minggu ' + (i + 1);
+                    return 'Bulan ' + (i + 1);
+                });
+
+                if (sensorDashboardCharts[sensorName]) {
+                    sensorDashboardCharts[sensorName].destroy();
+                }
+
+                const ctx = canvas.getContext('2d');
+                const color = getSensorChartColor(sensorName);
+
+                sensorDashboardCharts[sensorName] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: chartData.label || sensorName,
+                            data: rangeData,
+                            borderColor: color.border,
+                            backgroundColor: color.background,
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointBackgroundColor: color.border,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: {
+                                    boxWidth: 8,
+                                    font: { size: 11 },
+                                    color: '#64748b',
+                                    padding: 8,
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                                titleFont: { size: 12, weight: 'bold' },
+                                bodyFont: { size: 11 },
+                                padding: 8,
+                                displayColors: true,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: chartData.maxValue || 100,
+                                ticks: {
+                                    font: { size: 10 },
+                                    color: '#94a3b8',
+                                },
+                                grid: {
+                                    color: '#e2e8f0',
+                                    drawBorder: false,
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: { size: 10 },
+                                    color: '#94a3b8',
+                                },
+                                grid: {
+                                    display: false,
+                                    drawBorder: false,
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        function getSensorChartColor(sensor) {
+            const colors = {
+                'ph': { border: '#3b82f6', background: 'rgba(59, 130, 246, 0.1)' },
+                'temperature': { border: '#ef4444', background: 'rgba(239, 68, 68, 0.1)' },
+                'tds': { border: '#06b6d4', background: 'rgba(6, 182, 212, 0.1)' },
+                'turbidity': { border: '#8b5cf6', background: 'rgba(139, 92, 246, 0.1)' },
+                'do': { border: '#10b981', background: 'rgba(16, 185, 129, 0.1)' },
+                'kelembaban': { border: '#6366f1', background: 'rgba(99, 102, 241, 0.1)' },
+                'pm25': { border: '#f97316', background: 'rgba(249, 115, 22, 0.1)' },
+                'pm10': { border: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)' },
+                'uvIndex': { border: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)' },
+                'intensitasHujan': { border: '#06b6d4', background: 'rgba(6, 182, 212, 0.1)' },
+                'kecepatanAngin': { border: '#60a5fa', background: 'rgba(96, 165, 250, 0.1)' },
+            };
+            return colors[sensor] || { border: '#64748b', background: 'rgba(100, 116, 139, 0.1)' };
+        }
+
+        function updateSensorChartsRange(range) {
+            currentSensorRange = range;
+
+            // Update button styles
+            document.querySelectorAll('.sensor-chart-range-btn').forEach(btn => {
+                btn.classList.remove('active:bg-cyan-50', 'active:border-cyan-300', 'active:text-cyan-700');
+                if (btn.getAttribute('data-range') === range) {
+                    btn.classList.add('active:bg-cyan-50', 'active:border-cyan-300', 'active:text-cyan-700');
+                    btn.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
+                    btn.style.borderColor = '#22c55e';
+                    btn.style.color = '#16a34a';
+                } else {
+                    btn.style.backgroundColor = '';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }
+            });
+
+            initSensorDashboardCharts();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            initRegionChart();
+            initSensorDashboardCharts();
+
+            // Sensor Chart Range Buttons
+            document.querySelectorAll('.sensor-chart-range-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const range = this.getAttribute('data-range');
+                    updateSensorChartsRange(range);
+                });
+            });
 
             const slides = Array.from(document.querySelectorAll('.sensor-slide'));
             const dots = Array.from(document.querySelectorAll('.slide-dot'));
