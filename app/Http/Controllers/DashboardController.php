@@ -202,7 +202,6 @@ class DashboardController extends Controller
                 ['label' => 'Total alat', 'value' => $totalDevices, 'note' => 'Perangkat terpasang'],
                 ['label' => 'Alat aktif', 'value' => $activeDevices, 'note' => 'Berfungsi normal'],
                 ['label' => 'Perlu perhatian', 'value' => $warningDevices, 'note' => 'Waspada / maintenance'],
-                ['label' => 'Rata-rata skor', 'value' => $avgScoreAll, 'note' => 'Kondisi keseluruhan'],
             ],
 
             'ai_summary' => $aiSummary,
