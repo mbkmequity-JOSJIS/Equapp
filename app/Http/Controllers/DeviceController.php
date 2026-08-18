@@ -57,7 +57,7 @@ class DeviceController extends Controller
 
         // Tambahkan AI Recommendations
         try {
-            // $aiRecommendations = $this->aiService->generateRecommendations($deviceDataInfo, $deviceDataMonitoring);
+            $aiRecommendations = $this->aiService->generateRecommendations($deviceDataInfo, $deviceDataMonitoring);
             $deviceDataMonitoring['ai_recommendations'] = [
                 'summary' => $aiRecommendations['summary'] ?? 'Tidak ada ringkasan',
                 'recommendations' => $aiRecommendations['recommendations'] ?? [],
